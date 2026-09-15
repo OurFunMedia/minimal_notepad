@@ -21,6 +21,7 @@
       --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
       --toast-bg: #2d312e;
       --toast-text: #ffffff;
+      --recording-color: #dc2626;
     }
 
     * {
@@ -50,7 +51,7 @@
     .header-left {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
     }
 
     .app-title {
@@ -72,7 +73,7 @@
       border-radius: 50%;
     }
 
-    /* Google 廣東話輸入法狀態切換按鈕 */
+    /* 廣東話鍵盤開關 */
     .ime-pill {
       display: inline-flex;
       align-items: center;
@@ -116,6 +117,41 @@
     .ime-pill.active .badge {
       background: var(--primary-color);
       color: #ffffff;
+    }
+
+    /* 語音輸入按鈕 */
+    .voice-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--accent-soft);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .voice-pill:hover {
+      background: var(--accent-hover);
+      color: var(--text-main);
+    }
+
+    .voice-pill.recording {
+      background: #fee2e2;
+      color: var(--recording-color);
+      border-color: #fca5a5;
+      font-weight: 600;
+      animation: pulseRecording 1.4s infinite;
+    }
+
+    @keyframes pulseRecording {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
+      50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
     }
 
     .status-info {
@@ -291,13 +327,13 @@
       user-select: none;
     }
 
-    .btn-copy {
+    .btn-action {
       background-color: var(--accent-soft);
       color: var(--text-main);
       border-color: #e2e7e2;
     }
 
-    .btn-copy:hover {
+    .btn-action:hover {
       background-color: var(--accent-hover);
       border-color: #d7ded7;
     }
@@ -403,8 +439,8 @@
     }
 
     svg {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       stroke-width: 2;
       stroke: currentColor;
       fill: none;
@@ -421,10 +457,22 @@
         <span class="dot"></span>
         <span>Notepad Canvas</span>
       </div>
-      <!-- 廣東話輸入法切換按鈕 -->
+      
+      <!-- 廣東話輸入法 (粵拼) 切換 -->
       <div class="ime-pill active" id="btnImeToggle" title="點擊切換 Google 廣東話 / 英文輸入">
         <span class="badge">粵</span>
-        <span>Google 廣東話</span>
+        <span>粵拼鍵盤</span>
+      </div>
+
+      <!-- 廣東話語音輸入切換 -->
+      <div class="voice-pill" id="btnVoiceToggle" title="點擊開始廣東話語音輸入（自動轉繁體中文）">
+        <svg viewBox="0 0 24 24" id="micIcon">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+        <span id="voiceStatusText">粵語語音</span>
       </div>
     </div>
     <div class="status-info" id="statusText">自動儲存於瀏覽器</div>
@@ -433,7 +481,7 @@
   <main>
     <div class="editor-container">
       <div class="editor-body">
-        <textarea id="editor" placeholder="在此處自由輸入文字...（已內建 Google 廣東話輸入法，如輸入 nei / sik / dim / hou）" autofocus></textarea>
+        <textarea id="editor" placeholder="在此處自由輸入文字...（支援廣東話語音轉繁體中文與粵拼輸入法）" autofocus></textarea>
 
         <!-- 廣東話候選詞懸浮視窗 -->
         <div class="ime-panel" id="imePanel">
@@ -448,8 +496,20 @@
       <div class="action-bar">
         <div class="stats" id="stats">0 字元 · 0 詞</div>
         <div class="buttons">
+          <!-- 剪下按鈕 -->
+          <button type="button" class="btn-action" id="btnCut" title="剪下至剪貼簿">
+            <svg viewBox="0 0 24 24">
+              <circle cx="6" cy="6" r="3"></circle>
+              <circle cx="6" cy="18" r="3"></circle>
+              <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+              <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+              <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+            </svg>
+            剪下
+          </button>
+
           <!-- 複製按鈕 -->
-          <button type="button" class="btn-copy" id="btnCopy" title="複製至剪貼簿">
+          <button type="button" class="btn-action" id="btnCopy" title="複製至剪貼簿">
             <svg viewBox="0 0 24 24">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -488,19 +548,29 @@
 
   <div class="toast" id="toast">已複製到剪貼簿</div>
 
+  <!-- 引入輕量純前端簡轉繁引擎，確保語音輸出 100% 正體/繁體中文 -->
+  <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+
   <script>
     const editor = document.getElementById('editor');
     const stats = document.getElementById('stats');
+    const btnCut = document.getElementById('btnCut');
     const btnCopy = document.getElementById('btnCopy');
     const btnDownload = document.getElementById('btnDownload');
     const downloadBtnText = document.getElementById('downloadBtnText');
     const btnToggleMenu = document.getElementById('btnToggleMenu');
     const formatMenu = document.getElementById('formatMenu');
     const toast = document.getElementById('toast');
+
+    // 鍵盤輸入法元素
     const btnImeToggle = document.getElementById('btnImeToggle');
     const imePanel = document.getElementById('imePanel');
     const imeQueryText = document.getElementById('imeQueryText');
     const imeCandidates = document.getElementById('imeCandidates');
+
+    // 語音輸入元素
+    const btnVoiceToggle = document.getElementById('btnVoiceToggle');
+    const voiceStatusText = document.getElementById('voiceStatusText');
 
     let currentFormat = 'txt';
     let isImeActive = true;
@@ -508,7 +578,13 @@
     let candidatesList = [];
     let selectedIndex = 0;
 
-    // 載入 LocalStorage 儲存之內容
+    // 初始化簡轉繁轉換器（簡體/異體 -> 香港標準繁體）
+    let toTraditional = (text) => text;
+    if (window.OpenCC) {
+      toTraditional = OpenCC.Converter({ from: 'cn', to: 'hk' });
+    }
+
+    // 載入 LocalStorage 儲存內容
     window.addEventListener('DOMContentLoaded', () => {
       const saved = localStorage.getItem('zen_notepad_content');
       if (saved) {
@@ -517,7 +593,7 @@
       }
     });
 
-    // 鍵入時自動計算字數並存至 LocalStorage
+    // 鍵入更新統計與儲存
     editor.addEventListener('input', () => {
       updateStats();
       localStorage.setItem('zen_notepad_content', editor.value);
@@ -526,7 +602,7 @@
     function updateStats() {
       const text = editor.value;
       const chars = text.length;
-      const words = text.trim() ? (text.match(/\S+/g) || []).length : 0;
+      const words = text.trim() ? (text.match(/\\S+/g) || []).length : 0;
       stats.textContent = `${chars} 字元 · ${words} 詞`;
     }
 
@@ -535,18 +611,185 @@
       toast.classList.add('show');
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 2000);
+      }, 2200);
     }
 
-    // 切換廣東話輸入法開關
+    /* ==========================================================
+       剪下與複製功能
+       ========================================================== */
+    // 剪下邏輯：選取時剪下選取內容，未選取時剪下全部
+    btnCut.addEventListener('click', async () => {
+      if (!editor.value) {
+        showToast('沒有內容可剪下');
+        return;
+      }
+
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      let textToCut = '';
+      let isPartial = false;
+
+      if (start !== end) {
+        textToCut = editor.value.substring(start, end);
+        isPartial = true;
+      } else {
+        textToCut = editor.value;
+      }
+
+      if (!textToCut) {
+        showToast('沒有內容可剪下');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(textToCut);
+      } catch (err) {
+        // 備用複製方案
+        const temp = document.createElement('textarea');
+        temp.value = textToCut;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+      }
+
+      if (isPartial) {
+        editor.value = editor.value.substring(0, start) + editor.value.substring(end);
+        editor.selectionStart = editor.selectionEnd = start;
+      } else {
+        editor.value = '';
+      }
+
+      editor.focus();
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+      showToast('已剪下至剪貼簿 ✂️');
+    });
+
+    // 複製邏輯
+    btnCopy.addEventListener('click', async () => {
+      if (!editor.value.trim()) {
+        showToast('沒有內容可複製');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(editor.value);
+        showToast('已複製到剪貼簿 ✨');
+      } catch (err) {
+        editor.select();
+        document.execCommand('copy');
+        showToast('已複製到剪貼簿 ✨');
+      }
+    });
+
+    /* ==========================================================
+       廣東話語音輸入（Web Speech API - zh-HK）
+       + 自動即時轉為繁體中文（香港/台灣正體標準）
+       ========================================================== */
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isRecording = false;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.lang = 'zh-HK';
+
+      recognition.onstart = () => {
+        isRecording = true;
+        btnVoiceToggle.classList.add('recording');
+        voiceStatusText.textContent = '聆聽中...';
+        showToast('正在聆聽廣東話，將自動輸出繁體中文...');
+      };
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            transcript += event.results[i][0].transcript;
+          }
+        }
+        if (transcript) {
+          const traditionalText = toTraditional(transcript);
+          insertTextAtCursor(traditionalText);
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.error('語音識別錯誤:', event.error);
+        if (event.error === 'not-allowed') {
+          showToast('請允許瀏覽器麥克風權限以使用語音輸入');
+        } else {
+          showToast(`語音識別中斷: ${event.error}`);
+        }
+        stopRecording();
+      };
+
+      recognition.onend = () => {
+        if (isRecording) {
+          try {
+            recognition.start();
+          } catch (err) {
+            stopRecording();
+          }
+        } else {
+          stopRecording();
+        }
+      };
+    }
+
+    function startRecording() {
+      if (!recognition) {
+        showToast('目前瀏覽器不支援 Web Speech API，建議使用 Chrome 或 Edge');
+        return;
+      }
+      try {
+        recognition.start();
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      btnVoiceToggle.classList.remove('recording');
+      voiceStatusText.textContent = '粵語語音';
+      if (recognition) {
+        try { recognition.stop(); } catch(e){}
+      }
+    }
+
+    btnVoiceToggle.addEventListener('click', () => {
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+        showToast('已結束語音輸入');
+      }
+    });
+
+    function insertTextAtCursor(text) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const val = editor.value;
+
+      editor.value = val.substring(0, start) + text + val.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + text.length;
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+    }
+
+    /* ==========================================================
+       Google 廣東話粵拼輸入法 (JSONP)
+       ========================================================== */
     btnImeToggle.addEventListener('click', () => {
       isImeActive = !isImeActive;
       btnImeToggle.classList.toggle('active', isImeActive);
       if (!isImeActive) cancelIME();
-      showToast(isImeActive ? '已啟用 Google 廣東話輸入法' : '已關閉廣東話輸入法（原生鍵盤）');
+      showToast(isImeActive ? '已啟用粵拼鍵盤' : '已切換為原生鍵盤');
     });
 
-    // Google Input Tools 廣東話粵拼 API 請求 (JSONP)
     function fetchGoogleCantonese(query) {
       return new Promise((resolve) => {
         const callbackName = 'google_ime_' + Math.floor(Math.random() * 1000000);
@@ -576,12 +819,10 @@
       });
     }
 
-    // 鍵盤事件監聽（廣東話輸入攔截）
     editor.addEventListener('keydown', async (e) => {
       if (!isImeActive) return;
 
       if (imeBuffer.length > 0) {
-        // 空白鍵 或 Enter：選擇當前選中字詞
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
           if (candidatesList.length > 0) {
@@ -592,7 +833,6 @@
           return;
         }
 
-        // 數字鍵 1-6 快速選字
         if (/^[1-6]$/.test(e.key)) {
           const idx = parseInt(e.key) - 1;
           if (idx < candidatesList.length) {
@@ -602,7 +842,6 @@
           }
         }
 
-        // 左右 / 上下方向鍵選字
         if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
           e.preventDefault();
           selectedIndex = (selectedIndex + 1) % candidatesList.length;
@@ -616,7 +855,6 @@
           return;
         }
 
-        // 退格鍵
         if (e.key === 'Backspace') {
           e.preventDefault();
           imeBuffer = imeBuffer.slice(0, -1);
@@ -628,7 +866,6 @@
           return;
         }
 
-        // Escape 放棄輸入
         if (e.key === 'Escape') {
           e.preventDefault();
           cancelIME();
@@ -636,7 +873,6 @@
         }
       }
 
-      // 攔截一般英文字母進行拼音收集
       if (/^[a-z]$/i.test(e.key) && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
         imeBuffer += e.key.toLowerCase();
@@ -670,14 +906,7 @@
     }
 
     function commitCandidate(word) {
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      const val = editor.value;
-
-      editor.value = val.substring(0, start) + word + val.substring(end);
-      editor.selectionStart = editor.selectionEnd = start + word.length;
-      updateStats();
-      localStorage.setItem('zen_notepad_content', editor.value);
+      insertTextAtCursor(word);
       cancelIME();
     }
 
@@ -688,23 +917,9 @@
       imePanel.style.display = 'none';
     }
 
-    // 複製功能
-    btnCopy.addEventListener('click', async () => {
-      if (!editor.value.trim()) {
-        showToast('沒有內容可複製');
-        return;
-      }
-      try {
-        await navigator.clipboard.writeText(editor.value);
-        showToast('已複製到剪貼簿 ✨');
-      } catch (err) {
-        editor.select();
-        document.execCommand('copy');
-        showToast('已複製到剪貼簿 ✨');
-      }
-    });
-
-    // 下載功能核心邏輯
+    /* ==========================================================
+       檔案下載功能
+       ========================================================== */
     function triggerDownload(ext) {
       const content = editor.value;
       if (!content.trim()) {
@@ -739,7 +954,6 @@
       triggerDownload(currentFormat);
     });
 
-    // 下拉選單切換下載格式
     btnToggleMenu.addEventListener('click', (e) => {
       e.stopPropagation();
       formatMenu.classList.toggle('show');
@@ -755,7 +969,6 @@
       });
     });
 
-    // 點擊外部關閉選單
     document.addEventListener('click', (e) => {
       if (!formatMenu.contains(e.target) && e.target !== btnToggleMenu) {
         formatMenu.classList.remove('show');
