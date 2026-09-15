@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>極簡純淨筆記 Minimal Notepad</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #fbfbf9;
+      --card-bg: #ffffff;
+      --text-main: #2d312e;
+      --text-muted: #787c77;
+      --border-color: #e5e7eb;
+      --accent-soft: #f0f3f0;
+      --accent-hover: #e3e7e2;
+      --primary-color: #3b4a3f;
+      --primary-hover: #2c382f;
+      --shadow-subtle: 0 4px 20px -2px rgba(0, 0, 0, 0.04);
+      --toast-bg: #2d312e;
+      --toast-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 18px 28px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .app-title {
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-title span.dot {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: #8ea89d;
+      border-radius: 50%;
+    }
+
+    .status-info {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 0 24px 20px;
+      min-height: 0;
+    }
+
+    .editor-container {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-subtle);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .editor-container:focus-within {
+      border-color: #cbd5e1;
+      box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
+    }
+
+    textarea {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      padding: 24px 28px;
+      font-family: inherit;
+      font-size: 16px;
+      line-height: 1.75;
+      color: var(--text-main);
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+    }
+
+    textarea::placeholder {
+      color: #adb5bd;
+      font-weight: 300;
+    }
+
+    /* 底部操作欄 */
+    .action-bar {
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #f1f3f2;
+      background: #fdfdfc;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
+    }
+
+    .stats {
+      font-size: 13px;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 9px 18px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      user-select: none;
+    }
+
+    .btn-copy {
+      background-color: var(--accent-soft);
+      color: var(--text-main);
+      border-color: #e2e7e2;
+    }
+
+    .btn-copy:hover {
+      background-color: var(--accent-hover);
+      border-color: #d7ded7;
+    }
+
+    .btn-download-group {
+      display: inline-flex;
+      position: relative;
+    }
+
+    .btn-download-main {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      padding-right: 12px;
+    }
+
+    .btn-download-main:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-download-dropdown {
+      background-color: var(--primary-color);
+      color: #ffffff;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      padding: 9px 10px;
+      border-left: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-download-dropdown:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      right: 0;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      display: none;
+      flex-direction: column;
+      min-width: 140px;
+      overflow: hidden;
+      z-index: 10;
+    }
+
+    .dropdown-menu.show {
+      display: flex;
+    }
+
+    .dropdown-item {
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--text-main);
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 0;
+    }
+
+    .dropdown-item:hover {
+      background-color: #f7f9f8;
+    }
+
+    .dropdown-item span.ext {
+      font-size: 11px;
+      color: var(--text-muted);
+      background: #edf1ee;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* 輕量提示浮窗 (Toast) */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--toast-bg);
+      color: var(--toast-text);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 100;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    svg {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2;
+      stroke: currentColor;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="app-title">
+      <span class="dot"></span>
+      <span>Notepad Canvas</span>
+    </div>
+    <div class="status-info" id="statusText">自動儲存於瀏覽器</div>
+  </header>
+
+  <main>
+    <div class="editor-container">
+      <textarea id="editor" placeholder="在此處自由輸入文字、隨記、靈感或筆記..." autofocus></textarea>
+      
+      <div class="action-bar">
+        <div class="stats" id="stats">0 字元 · 0 詞</div>
+        <div class="buttons">
+          <!-- 複製按鈕 -->
+          <button type="button" class="btn-copy" id="btnCopy" title="複製至剪貼簿">
+            <svg viewBox="0 0 24 24">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            複製
+          </button>
+
+          <!-- 下載按鈕組（預設 .txt，可選 .md） -->
+          <div class="btn-download-group">
+            <button type="button" class="btn-download-main" id="btnDownload" title="直接下載檔案">
+              <svg viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span id="downloadBtnText">下載 .txt</span>
+            </button>
+            <button type="button" class="btn-download-dropdown" id="btnToggleMenu" title="切換格式">
+              <svg viewBox="0 0 24 24" style="width: 13px; height: 13px;">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+            <div class="dropdown-menu" id="formatMenu">
+              <button class="dropdown-item" data-ext="txt">
+                純文字檔 <span class="ext">.txt</span>
+              </button>
+              <button class="dropdown-item" data-ext="md">
+                Markdown <span class="ext">.md</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">已複製到剪貼簿</div>
+
+  <script>
+    const editor = document.getElementById('editor');
+    const stats = document.getElementById('stats');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnDownload = document.getElementById('btnDownload');
+    const downloadBtnText = document.getElementById('downloadBtnText');
+    const btnToggleMenu = document.getElementById('btnToggleMenu');
+    const formatMenu = document.getElementById('formatMenu');
+    const toast = document.getElementById('toast');
+
+    let currentFormat = 'txt';
+
+    // 載入 LocalStorage 儲存之內容
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('zen_notepad_content');
+      if (saved) {
+        editor.value = saved;
+        updateStats();
+      }
+    });
+
+    // 鍵入時自動計算字數並存至 LocalStorage
+    editor.addEventListener('input', () => {
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+    });
+
+    function updateStats() {
+      const text = editor.value;
+      const chars = text.length;
+      const words = text.trim() ? (text.match(/\S+/g) || []).length : 0;
+      stats.textContent = `${chars} 字元 · ${words} 詞`;
+    }
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+
+    // 複製功能
+    btnCopy.addEventListener('click', async () => {
+      if (!editor.value.trim()) {
+        showToast('沒有內容可複製');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(editor.value);
+        showToast('已複製到剪貼簿 ✨');
+      } catch (err) {
+        editor.select();
+        document.execCommand('copy');
+        showToast('已複製到剪貼簿 ✨');
+      }
+    });
+
+    // 下載功能核心邏輯
+    function triggerDownload(ext) {
+      const content = editor.value;
+      if (!content.trim()) {
+        showToast('沒有內容可下載');
+        return;
+      }
+
+      const mimeTypes = {
+        txt: 'text/plain;charset=utf-8',
+        md: 'text/markdown;charset=utf-8'
+      };
+
+      const blob = new Blob([content], { type: mimeTypes[ext] || 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      
+      const now = new Date();
+      const timestamp = now.toISOString().slice(0, 10) + '_' + 
+                        String(now.getHours()).padStart(2, '0') + 
+                        String(now.getMinutes()).padStart(2, '0');
+      
+      a.href = url;
+      a.download = `note_${timestamp}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`已下載為 .${ext} 檔案`);
+    }
+
+    btnDownload.addEventListener('click', () => {
+      triggerDownload(currentFormat);
+    });
+
+    // 下拉選單切換下載格式
+    btnToggleMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+      formatMenu.classList.toggle('show');
+    });
+
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const ext = item.getAttribute('data-ext');
+        currentFormat = ext;
+        downloadBtnText.textContent = `下載 .${ext}`;
+        formatMenu.classList.remove('show');
+        triggerDownload(ext);
+      });
+    });
+
+    // 點擊外部關閉選單
+    document.addEventListener('click', (e) => {
+      if (!formatMenu.contains(e.target) && e.target !== btnToggleMenu) {
+        formatMenu.classList.remove('show');
+      }
+    });
+  </script>
+</body>
+</html>
