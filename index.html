@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>極簡純淨筆記 Minimal Notepad</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +30,7 @@
       margin: 0;
       padding: 0;
       -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -37,34 +38,44 @@
       background-color: var(--bg-color);
       color: var(--text-main);
       height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
     header {
-      padding: 18px 28px 12px;
+      padding: 12px 16px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    @media (min-width: 640px) {
+      header {
+        padding: 18px 24px 12px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    .header-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
     .app-title {
-      font-size: 15px;
-      font-weight: 500;
+      font-size: 14px;
+      font-weight: 600;
       letter-spacing: 0.05em;
       color: var(--text-muted);
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .app-title span.dot {
@@ -75,12 +86,26 @@
       border-radius: 50%;
     }
 
-    /* 頂部標籤膠囊通用樣式 */
+    .status-info {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .pill-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .pill-group::-webkit-scrollbar { display: none; }
+
     .pill {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
+      gap: 5px;
+      padding: 5px 12px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 500;
@@ -89,13 +114,11 @@
       border: 1px solid var(--border-color);
       cursor: pointer;
       user-select: none;
+      white-space: nowrap;
+      flex-shrink: 0;
       transition: all 0.2s ease;
     }
-
-    .pill:hover {
-      background: var(--accent-hover);
-      color: var(--text-main);
-    }
+    .pill:active { transform: scale(0.96); }
 
     .pill.active {
       background: #e8efe9;
@@ -108,20 +131,18 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 17px;
-      height: 17px;
+      width: 16px;
+      height: 16px;
       border-radius: 50%;
       background: #cbd8cf;
-      font-size: 11px;
+      font-size: 10px;
       color: #2c382f;
     }
-
     .pill.active .badge {
       background: var(--primary-color);
       color: #ffffff;
     }
 
-    /* 語音按鈕錄音中狀態 */
     .voice-pill.recording {
       background: #fee2e2 !important;
       color: var(--recording-color) !important;
@@ -129,54 +150,45 @@
       font-weight: 600;
       animation: pulseRecording 1.4s infinite;
     }
-
     @keyframes pulseRecording {
       0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
       50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
     }
 
-    /* AI 修飾開關狀態 */
     .ai-pill.active {
       background: #eef2ff !important;
       color: #4f46e5 !important;
       border-color: #c7d2fe !important;
     }
 
-    .status-info {
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 0 24px 20px;
+      padding: 0 12px 14px;
       min-height: 0;
+    }
+    @media (min-width: 640px) {
+      main { padding: 0 24px 20px; }
     }
 
     .editor-container {
       flex: 1;
       background: var(--card-bg);
-      border-radius: 16px;
+      border-radius: 14px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-subtle);
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .editor-container:focus-within {
-      border-color: #cbd5e1;
-      box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
     }
 
     .editor-body {
       flex: 1;
       position: relative;
       display: flex;
+      flex-direction: column;
       min-height: 0;
     }
 
@@ -184,51 +196,124 @@
       flex: 1;
       width: 100%;
       height: 100%;
-      padding: 24px 28px;
+      padding: 16px 18px;
       font-family: inherit;
       font-size: 16px;
-      line-height: 1.75;
+      line-height: 1.65;
       color: var(--text-main);
       background: transparent;
       border: none;
       outline: none;
       resize: none;
     }
+    @media (min-width: 640px) {
+      textarea {
+        padding: 24px 28px;
+        font-size: 16px;
+        line-height: 1.75;
+      }
+    }
+    textarea::placeholder { color: #adb5bd; font-weight: 300; }
 
-    textarea::placeholder {
-      color: #adb5bd;
-      font-weight: 300;
+    /* 頂部嵌入式/懸浮式候選字 Bar（解決手機鍵盤遮擋與點擊失焦問題） */
+    .ime-candidate-bar {
+      display: none;
+      background: #ffffff;
+      border-top: 1px solid var(--border-color);
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+      padding: 6px 10px;
+      z-index: 50;
+      flex-shrink: 0;
+      touch-action: manipulation;
     }
 
-    /* 即時聽寫浮動字幕提示列 (Live Caption Bar) */
+    .ime-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2px 6px 4px 6px;
+    }
+
+    .ime-query {
+      font-family: 'Plus Jakarta Sans', monospace;
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--primary-color);
+      letter-spacing: 0.05em;
+    }
+
+    .ime-close-btn {
+      font-size: 11px;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: #f1f3f2;
+    }
+
+    .ime-list {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 4px 0;
+      scrollbar-width: none;
+    }
+    .ime-list::-webkit-scrollbar { display: none; }
+
+    .ime-item {
+      padding: 8px 14px;
+      border-radius: 8px;
+      background: #f4f6f4;
+      color: var(--text-main);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.12s ease;
+    }
+    .ime-item:active {
+      background: #dfe6df;
+      transform: scale(0.96);
+    }
+    .ime-item.active {
+      background: #e3ebe4;
+      color: var(--primary-color);
+      border: 1px solid #cbd7cd;
+    }
+    .ime-item .num {
+      font-size: 11px;
+      color: #949a94;
+    }
+
+    /* 語音聽寫字幕條 */
     .live-caption-bar {
       display: none;
       position: absolute;
-      left: 28px;
-      bottom: 24px;
-      max-width: calc(100% - 56px);
-      background: rgba(45, 49, 46, 0.88);
+      left: 14px;
+      bottom: 14px;
+      max-width: calc(100% - 28px);
+      background: rgba(45, 49, 46, 0.9);
       color: #f3f4f6;
-      padding: 7px 16px;
+      padding: 6px 14px;
       border-radius: 20px;
-      font-size: 13px;
+      font-size: 12px;
       backdrop-filter: blur(6px);
       box-shadow: 0 6px 16px rgba(0,0,0,0.12);
       pointer-events: none;
       z-index: 40;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      animation: liveFadeIn 0.15s ease-out;
     }
-
-    @keyframes liveFadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     .live-dot {
       display: inline-block;
       width: 6px;
@@ -237,177 +322,112 @@
       background: #ef4444;
       animation: liveBlink 1s infinite;
     }
-
     @keyframes liveBlink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
     }
 
-    /* 廣東話輸入候選浮窗 */
-    .ime-panel {
-      display: none;
-      position: absolute;
-      bottom: 18px;
-      left: 28px;
-      background: #ffffff;
-      border: 1px solid #dcdfdc;
-      border-radius: 12px;
-      box-shadow: 0 12px 32px -4px rgba(45, 49, 46, 0.12), 0 4px 12px -2px rgba(45, 49, 46, 0.05);
-      padding: 8px 12px;
-      z-index: 50;
-      min-width: 260px;
-      font-size: 14px;
-      backdrop-filter: blur(8px);
-      animation: imeFadeIn 0.15s ease-out;
-    }
-
-    @keyframes imeFadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .ime-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 6px;
-      margin-bottom: 6px;
-      border-bottom: 1px solid #f1f3f2;
-    }
-
-    .ime-query {
-      font-family: 'Plus Jakarta Sans', monospace;
-      font-weight: 600;
-      color: var(--primary-color);
-      letter-spacing: 0.05em;
-    }
-
-    .ime-tip {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .ime-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-
-    .ime-item {
-      padding: 5px 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      color: var(--text-main);
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .ime-item.active {
-      background-color: var(--accent-soft);
-      color: var(--primary-color);
-      font-weight: 500;
-    }
-
-    .ime-item:hover {
-      background-color: var(--accent-hover);
-    }
-
-    .ime-item .num {
-      font-size: 11px;
-      color: #949a94;
-    }
-
     /* 底部操作欄 */
     .action-bar {
-      padding: 14px 24px;
+      padding: 10px 14px;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 10px;
       border-top: 1px solid #f1f3f2;
       background: #fdfdfc;
-      border-bottom-left-radius: 16px;
-      border-bottom-right-radius: 16px;
+      border-bottom-left-radius: 14px;
+      border-bottom-right-radius: 14px;
+      flex-shrink: 0;
+    }
+    @media (min-width: 640px) {
+      .action-bar {
+        padding: 12px 20px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
     }
 
     .stats {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-muted);
       letter-spacing: 0.02em;
+      text-align: center;
+    }
+    @media (min-width: 640px) {
+      .stats { text-align: left; font-size: 13px; }
     }
 
     .buttons {
-      display: flex;
-      gap: 10px;
-      align-items: center;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      width: 100%;
+    }
+    @media (min-width: 640px) {
+      .buttons { display: flex; width: auto; gap: 8px; }
     }
 
     button {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
+      justify-content: center;
+      gap: 5px;
       font-family: inherit;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 500;
-      padding: 9px 18px;
-      border-radius: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
       border: 1px solid transparent;
       cursor: pointer;
-      transition: all 0.18s ease;
+      transition: all 0.16s ease;
       user-select: none;
+      white-space: nowrap;
     }
+    @media (min-width: 640px) {
+      button { padding: 8px 15px; font-size: 13px; }
+    }
+    button:active { transform: scale(0.97); }
 
     .btn-action {
       background-color: var(--accent-soft);
       color: var(--text-main);
       border-color: #e2e7e2;
     }
-
-    .btn-action:hover {
-      background-color: var(--accent-hover);
-      border-color: #d7ded7;
-    }
-
     .btn-ai-polish {
       background-color: #f5f3ff;
       color: #4f46e5;
       border-color: #e0e7ff;
     }
 
-    .btn-ai-polish:hover {
-      background-color: #ede9fe;
-      border-color: #c7d2fe;
-    }
-
     .btn-download-group {
-      display: inline-flex;
+      display: flex;
       position: relative;
+      width: 100%;
+    }
+    @media (min-width: 640px) {
+      .btn-download-group { width: auto; }
     }
 
     .btn-download-main {
+      flex: 1;
       background-color: var(--primary-color);
       color: #ffffff;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
-      padding-right: 12px;
+      padding-right: 6px;
+      padding-left: 8px;
     }
-
-    .btn-download-main:hover {
-      background-color: var(--primary-hover);
-    }
+    .btn-download-main:hover { background-color: var(--primary-hover); }
 
     .btn-download-dropdown {
       background-color: var(--primary-color);
       color: #ffffff;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
-      padding: 9px 10px;
+      padding: 8px 7px;
       border-left: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .btn-download-dropdown:hover {
-      background-color: var(--primary-hover);
     }
 
     .dropdown-menu {
@@ -417,20 +437,17 @@
       background: #ffffff;
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
       display: none;
       flex-direction: column;
-      min-width: 140px;
+      min-width: 135px;
       overflow: hidden;
-      z-index: 10;
+      z-index: 60;
     }
-
-    .dropdown-menu.show {
-      display: flex;
-    }
+    .dropdown-menu.show { display: flex; }
 
     .dropdown-item {
-      padding: 10px 16px;
+      padding: 10px 14px;
       font-size: 13px;
       color: var(--text-main);
       background: transparent;
@@ -443,125 +460,67 @@
       align-items: center;
       border-radius: 0;
     }
-
-    .dropdown-item:hover {
-      background-color: #f7f9f8;
-    }
-
     .dropdown-item span.ext {
       font-size: 11px;
       color: var(--text-muted);
       background: #edf1ee;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 4px;
     }
 
-    /* 提示浮窗 (Toast) */
     .toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 24px;
       left: 50%;
       transform: translateX(-50%) translateY(20px);
       background: var(--toast-bg);
       color: var(--toast-text);
-      padding: 10px 20px;
+      padding: 9px 18px;
       border-radius: 30px;
-      font-size: 14px;
-      letter-spacing: 0.02em;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 100;
+      max-width: 90%;
+      text-align: center;
     }
-
     .toast.show {
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
 
     svg {
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       stroke-width: 2;
       stroke: currentColor;
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
-    }
-
-    /* 設定 API Key Modal */
-    .modal-backdrop {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.3);
-      backdrop-filter: blur(2px);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-backdrop.show {
-      display: flex;
-    }
-
-    .modal-box {
-      background: #fff;
-      border-radius: 16px;
-      padding: 24px;
-      width: 90%;
-      max-width: 440px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-    }
-
-    .modal-box h3 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .modal-box p {
-      font-size: 13px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 16px;
-    }
-
-    .modal-box input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
-      margin-bottom: 16px;
-    }
-
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
+      flex-shrink: 0;
     }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="header-left">
+    <div class="header-top">
       <div class="app-title">
         <span class="dot"></span>
         <span>Notepad Canvas</span>
       </div>
-      
-      <!-- 廣東話輸入法 (粵拼) 切換 -->
-      <div class="pill active" id="btnImeToggle" title="點擊切換 Google 廣東話 / 英文輸入">
+      <div class="status-info" id="statusText">自動儲存中</div>
+    </div>
+    
+    <div class="pill-group">
+      <div class="pill active" id="btnImeToggle" title="切換 Google 廣東話 / 英文輸入">
         <span class="badge">粵</span>
         <span>粵拼鍵盤</span>
       </div>
 
-      <!-- 廣東話語音輸入切換 -->
-      <div class="pill voice-pill" id="btnVoiceToggle" title="點擊開始廣東話語音輸入（即時逐字顯示）">
+      <div class="pill voice-pill" id="btnVoiceToggle" title="廣東話語音輸入">
         <svg viewBox="0 0 24 24">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -571,51 +530,48 @@
         <span id="voiceStatusText">粵語語音</span>
       </div>
 
-      <!-- AI 即時修正開關 -->
-      <div class="pill ai-pill active" id="btnAiAutoToggle" title="語音停頓時是否自動透過 AI 潤色語句">
-        <svg viewBox="0 0 24 24" style="width: 13px; height: 13px;">
+      <div class="pill ai-pill active" id="btnAiAutoToggle" title="AI 潤色開關">
+        <svg viewBox="0 0 24 24">
           <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
         </svg>
-        <span id="aiAutoStatusText">AI 語音潤色: 開</span>
+        <span id="aiAutoStatusText">AI 潤色: 開</span>
       </div>
     </div>
-    <div class="status-info" id="statusText">自動儲存於瀏覽器</div>
   </header>
 
   <main>
     <div class="editor-container">
       <div class="editor-body">
-        <textarea id="editor" placeholder="在此處自由輸入文字...（語音輸入支援一邊講一邊即時出字）" autofocus></textarea>
+        <textarea id="editor" placeholder="在此處自由輸入文字...（手機支援輸入粵拼，在下方選字條點選）" autofocus></textarea>
 
-        <!-- 即時語音聽寫提示浮動字幕條 -->
+        <!-- 即時語音字幕條 -->
         <div class="live-caption-bar" id="liveCaptionBar">
           <span class="live-dot"></span>
           <span id="liveCaptionText">正在聽取...</span>
         </div>
+      </div>
 
-        <!-- 廣東話候選詞懸浮視窗 -->
-        <div class="ime-panel" id="imePanel">
-          <div class="ime-header">
-            <span class="ime-query" id="imeQueryText"></span>
-            <span class="ime-tip">數字 1-6 或 空白鍵選字</span>
-          </div>
-          <div class="ime-list" id="imeCandidates"></div>
+      <!-- 廣東話候選詞專屬工具列（貼合輸入框底部，防鍵盤遮蔽與失焦） -->
+      <div class="ime-candidate-bar" id="imePanel">
+        <div class="ime-header">
+          <span class="ime-query" id="imeQueryText">nei</span>
+          <span class="ime-close-btn" id="imeCloseBtn">關閉</span>
         </div>
+        <div class="ime-list" id="imeCandidates"></div>
       </div>
       
+      <!-- 底部按鈕操作欄 -->
       <div class="action-bar">
         <div class="stats" id="stats">0 字元 · 0 詞</div>
         <div class="buttons">
-          <!-- 一鍵 AI 潤色按鈕（針對已選取或全文） -->
-          <button type="button" class="btn-ai-polish" id="btnAiPolishManual" title="使用 AI 將內容修飾得更通順連貫">
+          <button type="button" class="btn-ai-polish" id="btnAiPolishManual" title="AI 優化修飾">
             <svg viewBox="0 0 24 24">
               <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
             </svg>
-            AI 潤色
+            <span>潤色</span>
           </button>
 
-          <!-- 剪下按鈕 -->
-          <button type="button" class="btn-action" id="btnCut" title="剪下至剪貼簿">
+          <button type="button" class="btn-action" id="btnCut" title="剪下">
             <svg viewBox="0 0 24 24">
               <circle cx="6" cy="6" r="3"></circle>
               <circle cx="6" cy="18" r="3"></circle>
@@ -623,40 +579,34 @@
               <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
               <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
             </svg>
-            剪下
+            <span>剪下</span>
           </button>
 
-          <!-- 複製按鈕 -->
-          <button type="button" class="btn-action" id="btnCopy" title="複製至剪貼簿">
+          <button type="button" class="btn-action" id="btnCopy" title="複製">
             <svg viewBox="0 0 24 24">
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
               <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
             </svg>
-            複製
+            <span>複製</span>
           </button>
 
-          <!-- 下載按鈕組（預設 .txt，可選 .md） -->
           <div class="btn-download-group">
-            <button type="button" class="btn-download-main" id="btnDownload" title="直接下載檔案">
+            <button type="button" class="btn-download-main" id="btnDownload" title="下載檔案">
               <svg viewBox="0 0 24 24">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
                 <line x1="12" y1="15" x2="12" y2="3"></line>
               </svg>
-              <span id="downloadBtnText">下載 .txt</span>
+              <span id="downloadBtnText">下載</span>
             </button>
-            <button type="button" class="btn-download-dropdown" id="btnToggleMenu" title="切換格式">
-              <svg viewBox="0 0 24 24" style="width: 13px; height: 13px;">
+            <button type="button" class="btn-download-dropdown" id="btnToggleMenu">
+              <svg viewBox="0 0 24 24" style="width: 11px; height: 11px;">
                 <polyline points="6 9 12 15 18 9"></polyline>
               </svg>
             </button>
             <div class="dropdown-menu" id="formatMenu">
-              <button class="dropdown-item" data-ext="txt">
-                純文字檔 <span class="ext">.txt</span>
-              </button>
-              <button class="dropdown-item" data-ext="md">
-                Markdown <span class="ext">.md</span>
-              </button>
+              <button class="dropdown-item" data-ext="txt">純文字檔 <span class="ext">.txt</span></button>
+              <button class="dropdown-item" data-ext="md">Markdown <span class="ext">.md</span></button>
             </div>
           </div>
         </div>
@@ -665,19 +615,6 @@
   </main>
 
   <div class="toast" id="toast">已複製到剪貼簿</div>
-
-  <!-- API Key 設定彈窗 -->
-  <div class="modal-backdrop" id="apiKeyModal">
-    <div class="modal-box">
-      <h3>設定 Google Gemini API Key（選填）</h3>
-      <p>若希望使用 Gemini 大模型進行更高品質的 AI 語意潤色，請填入 API Key。若留空，系統將直接以本地即時規則進行修飾。</p>
-      <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." autocomplete="off">
-      <div class="modal-actions">
-        <button class="btn-action" id="btnModalCancel">使用內建引擎</button>
-        <button class="btn-download-main" id="btnModalSave">儲存設定</button>
-      </div>
-    </div>
-  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
 
@@ -692,26 +629,20 @@
     const formatMenu = document.getElementById('formatMenu');
     const toast = document.getElementById('toast');
 
-    // 聽寫字幕組件
     const liveCaptionBar = document.getElementById('liveCaptionBar');
     const liveCaptionText = document.getElementById('liveCaptionText');
 
-    // 輸入法與語音
     const btnImeToggle = document.getElementById('btnImeToggle');
     const imePanel = document.getElementById('imePanel');
     const imeQueryText = document.getElementById('imeQueryText');
     const imeCandidates = document.getElementById('imeCandidates');
+    const imeCloseBtn = document.getElementById('imeCloseBtn');
     const btnVoiceToggle = document.getElementById('btnVoiceToggle');
     const voiceStatusText = document.getElementById('voiceStatusText');
 
-    // AI 修飾組件
     const btnAiAutoToggle = document.getElementById('btnAiAutoToggle');
     const aiAutoStatusText = document.getElementById('aiAutoStatusText');
     const btnAiPolishManual = document.getElementById('btnAiPolishManual');
-    const apiKeyModal = document.getElementById('apiKeyModal');
-    const geminiApiKeyInput = document.getElementById('geminiApiKeyInput');
-    const btnModalCancel = document.getElementById('btnModalCancel');
-    const btnModalSave = document.getElementById('btnModalSave');
 
     let currentFormat = 'txt';
     let isImeActive = true;
@@ -720,7 +651,6 @@
     let selectedIndex = 0;
     let isAiAutoPolish = true;
 
-    // 簡轉繁模組
     let toTraditional = (text) => text;
     if (window.OpenCC) {
       toTraditional = OpenCC.Converter({ from: 'cn', to: 'hk' });
@@ -732,10 +662,6 @@
         editor.value = saved;
         updateStats();
       }
-      const savedKey = localStorage.getItem('gemini_api_key');
-      if (savedKey) {
-        geminiApiKeyInput.value = savedKey;
-      }
     });
 
     editor.addEventListener('input', () => {
@@ -746,7 +672,7 @@
     function updateStats() {
       const text = editor.value;
       const chars = text.length;
-      const words = text.trim() ? (text.match(/\S+/g) || []).length : 0;
+      const words = text.trim() ? (text.match(/\\S+/g) || []).length : 0;
       stats.textContent = `${chars} 字元 · ${words} 詞`;
     }
 
@@ -755,255 +681,11 @@
       toast.classList.add('show');
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 2200);
+      }, 2000);
     }
 
     /* ==========================================================
-       AI 潤色修飾核心
-       ========================================================== */
-    function localPolishRules(raw) {
-      let text = raw;
-      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\s]|$)/g, '');
-      text = text.replace(/(即係話|即係嗰個|咁樣嘅話|噉樣嘅話)/g, '即');
-      text = text.replace(/(然後呢|同埋呢|跟住呢)/g, '，');
-      text = text.replace(/(.{2,6}?)\1+/g, '$1');
-      text = text.replace(/\s+/g, '，');
-      if (!/[，。！？]$/.test(text.trim())) {
-        text = text.trim() + '。';
-      }
-      return text;
-    }
-
-    async function polishWithGemini(content, apiKey) {
-      const prompt = `你是一個專業的繁體中文編輯助手。請將以下由香港廣東話語音輸入的文字，修飾為通順、連貫、自然的繁體中文書面語（香港常用標準繁體）：
-1. 修正口語語病、冗言贅字與重複口誤。
-2. 加入適當標點符號。
-3. 嚴格保持原意，不添加額外評論或解釋。
-4. 僅直接輸出修訂後的文字。
-
-原文內容：
-${content}`;
-
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
-      });
-
-      if (!res.ok) throw new Error('API 呼叫失敗');
-      const data = await res.json();
-      const polished = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      return polished ? polished.trim() : content;
-    }
-
-    async function polishText(rawText) {
-      const apiKey = localStorage.getItem('gemini_api_key');
-      const baseCleaned = localPolishRules(toTraditional(rawText));
-
-      if (apiKey) {
-        try {
-          const aiResult = await polishWithGemini(rawText, apiKey);
-          return toTraditional(aiResult);
-        } catch (err) {
-          console.warn('Gemini 潤色失敗，切回本地智慧修飾', err);
-          return baseCleaned;
-        }
-      }
-      return baseCleaned;
-    }
-
-    btnAiAutoToggle.addEventListener('click', () => {
-      isAiAutoPolish = !isAiAutoPolish;
-      btnAiAutoToggle.classList.toggle('active', isAiAutoPolish);
-      aiAutoStatusText.textContent = `AI 語音潤色: ${isAiAutoPolish ? '開' : '關'}`;
-      showToast(isAiAutoPolish ? '已啟用語音自動 AI 潤色' : '已關閉語音潤色（原樣輸出）');
-    });
-
-    btnAiPolishManual.addEventListener('click', async () => {
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      const hasSelection = start !== end;
-      const targetText = hasSelection ? editor.value.substring(start, end) : editor.value;
-
-      if (!targetText.trim()) {
-        showToast('沒有可供潤色的內容');
-        return;
-      }
-
-      showToast('正在潤色優化文字...');
-      const polished = await polishText(targetText);
-
-      if (hasSelection) {
-        editor.value = editor.value.substring(0, start) + polished + editor.value.substring(end);
-        editor.selectionStart = start;
-        editor.selectionEnd = start + polished.length;
-      } else {
-        editor.value = polished;
-      }
-
-      updateStats();
-      localStorage.setItem('zen_notepad_content', editor.value);
-      showToast('AI 潤色完成 ✨');
-    });
-
-    btnModalSave.addEventListener('click', () => {
-      const key = geminiApiKeyInput.value.trim();
-      if (key) {
-        localStorage.setItem('gemini_api_key', key);
-        showToast('已保存 Gemini API Key');
-      } else {
-        localStorage.removeItem('gemini_api_key');
-        showToast('已清除 API Key');
-      }
-      apiKeyModal.classList.remove('show');
-    });
-
-    btnModalCancel.addEventListener('click', () => {
-      apiKeyModal.classList.remove('show');
-    });
-
-    /* ==========================================================
-       即時語音辨識核心（Web Speech API - 逐字即時回饋）
-       interimResults: true -> 即時串流顯示
-       ========================================================== */
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    let isRecording = false;
-    let speechInsertStartIndex = 0; // 記錄本次說話開始時的游標位置
-    let speechCurrentInsertedLength = 0; // 記錄當前正在即時更新的文字長度
-
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true; // 關鍵：開啟即時串流中間結果
-      recognition.lang = 'zh-HK';
-
-      recognition.onstart = () => {
-        isRecording = true;
-        btnVoiceToggle.classList.add('recording');
-        voiceStatusText.textContent = '聆聽中...';
-        liveCaptionBar.style.display = 'inline-flex';
-        liveCaptionText.textContent = '準備聆聽...';
-
-        // 鎖定起始游標位置
-        speechInsertStartIndex = editor.selectionStart;
-        speechCurrentInsertedLength = 0;
-        showToast('開始廣東話語音輸入（即時顯示）');
-      };
-
-      recognition.onresult = async (event) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const trans = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += trans;
-          } else {
-            interimTranscript += trans;
-          }
-        }
-
-        // 1. 如果有即時暫定結果（正在講、尚未停頓）：即時更新到畫面上
-        if (interimTranscript) {
-          const tradInterim = toTraditional(interimTranscript);
-          liveCaptionText.textContent = tradInterim;
-
-          // 即時覆蓋替換「當前未定稿句」
-          replaceInterimText(tradInterim);
-        }
-
-        // 2. 如果一句講完（產生 Final 結果）：執行定稿與 AI 潤色
-        if (finalTranscript) {
-          let output = toTraditional(finalTranscript);
-          liveCaptionText.textContent = output;
-
-          // 進行自動潤色
-          if (isAiAutoPolish) {
-            output = await polishText(output);
-          }
-
-          // 定稿覆蓋上屏
-          replaceInterimText(output);
-
-          // 推進游標起點，準備迎接下一句
-          speechInsertStartIndex = speechInsertStartIndex + output.length;
-          speechCurrentInsertedLength = 0;
-        }
-      };
-
-      recognition.onerror = (event) => {
-        console.error('語音識別錯誤:', event.error);
-        if (event.error === 'not-allowed') {
-          showToast('請允許麥克風權限以使用語音功能');
-        }
-        stopRecording();
-      };
-
-      recognition.onend = () => {
-        if (isRecording) {
-          try { 
-            recognition.start(); 
-          } catch(e) { 
-            stopRecording(); 
-          }
-        } else {
-          stopRecording();
-        }
-      };
-    }
-
-    // 將即時聽到的文字直接寫入 textarea（動態取代未定稿文字）
-    function replaceInterimText(text) {
-      const val = editor.value;
-      const before = val.substring(0, speechInsertStartIndex);
-      const after = val.substring(speechInsertStartIndex + speechCurrentInsertedLength);
-
-      editor.value = before + text + after;
-      speechCurrentInsertedLength = text.length;
-
-      // 將游標放置在最新字元後方並自動滾動
-      editor.selectionStart = editor.selectionEnd = speechInsertStartIndex + speechCurrentInsertedLength;
-      editor.scrollTop = editor.scrollHeight;
-
-      updateStats();
-      localStorage.setItem('zen_notepad_content', editor.value);
-    }
-
-    function startRecording() {
-      if (!recognition) {
-        showToast('目前瀏覽器不支援 Web Speech API，建議使用 Chrome 或 Edge');
-        return;
-      }
-      try { 
-        recognition.start(); 
-      } catch (err) {}
-    }
-
-    function stopRecording() {
-      isRecording = false;
-      btnVoiceToggle.classList.remove('recording');
-      voiceStatusText.textContent = '粵語語音';
-      liveCaptionBar.style.display = 'none';
-      speechCurrentInsertedLength = 0;
-      if (recognition) {
-        try { recognition.stop(); } catch(e){}
-      }
-    }
-
-    btnVoiceToggle.addEventListener('click', () => {
-      if (!isRecording) {
-        startRecording();
-      } else {
-        stopRecording();
-        showToast('已結束語音輸入');
-      }
-    });
-
-    /* ==========================================================
-       Google 廣東話粵拼鍵盤 (JSONP)
+       廣東話輸入法核心修復（防止手機失焦）
        ========================================================== */
     btnImeToggle.addEventListener('click', () => {
       isImeActive = !isImeActive;
@@ -1012,11 +694,15 @@ ${content}`;
       showToast(isImeActive ? '已啟用粵拼鍵盤' : '已切換為原生鍵盤');
     });
 
+    imeCloseBtn.addEventListener('click', () => {
+      cancelIME();
+    });
+
     function fetchGoogleCantonese(query) {
       return new Promise((resolve) => {
         const callbackName = 'google_ime_' + Math.floor(Math.random() * 1000000);
         const script = document.createElement('script');
-        script.src = `https://inputtools.google.com/request?text=${encodeURIComponent(query)}&itc=yue-hant-t-i0-und&num=6&cp=0&cs=1&ie=utf-8&oe=utf-8&app=test&cb=${callbackName}`;
+        script.src = `https://inputtools.google.com/request?text=${encodeURIComponent(query)}&itc=yue-hant-t-i0-und&num=8&cp=0&cs=1&ie=utf-8&oe=utf-8&app=test&cb=${callbackName}`;
         
         window[callbackName] = function(data) {
           cleanUp();
@@ -1051,7 +737,7 @@ ${content}`;
           return;
         }
 
-        if (/^[1-6]$/.test(e.key)) {
+        if (/^[1-8]$/.test(e.key)) {
           const idx = parseInt(e.key) - 1;
           if (idx < candidatesList.length) {
             e.preventDefault();
@@ -1098,6 +784,16 @@ ${content}`;
       }
     });
 
+    // 監聽手機虛擬鍵盤輸入
+    editor.addEventListener('beforeinput', (e) => {
+      if (!isImeActive) return;
+      if (e.data && /^[a-zA-Z]$/.test(e.data)) {
+        e.preventDefault();
+        imeBuffer += e.data.toLowerCase();
+        updateCandidates();
+      }
+    });
+
     async function updateCandidates() {
       imeQueryText.textContent = imeBuffer;
       imePanel.style.display = 'block';
@@ -1108,16 +804,23 @@ ${content}`;
       renderCandidates();
     }
 
+    // 關鍵修復：touchstart + preventDefault 確保手機鍵盤不收起且即時選中
     function renderCandidates() {
       imeCandidates.innerHTML = '';
-      candidatesList.slice(0, 6).forEach((word, idx) => {
+      candidatesList.slice(0, 8).forEach((word, idx) => {
         const item = document.createElement('div');
         item.className = 'ime-item' + (idx === selectedIndex ? ' active' : '');
         item.innerHTML = `<span class="num">${idx + 1}.</span><span>${word}</span>`;
-        item.addEventListener('mousedown', (e) => {
+
+        const handleSelect = (e) => {
           e.preventDefault();
+          e.stopPropagation();
           commitCandidate(word);
-        });
+        };
+
+        item.addEventListener('touchstart', handleSelect, { passive: false });
+        item.addEventListener('mousedown', handleSelect);
+
         imeCandidates.appendChild(item);
       });
       imePanel.style.display = 'block';
@@ -1126,6 +829,7 @@ ${content}`;
     function commitCandidate(word) {
       insertTextAtCursor(word);
       cancelIME();
+      editor.focus();
     }
 
     function cancelIME() {
@@ -1134,6 +838,178 @@ ${content}`;
       selectedIndex = 0;
       imePanel.style.display = 'none';
     }
+
+    function insertTextAtCursor(text) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const val = editor.value;
+
+      editor.value = val.substring(0, start) + text + val.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + text.length;
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+    }
+
+    /* ==========================================================
+       語音輸入 (Web Speech API)
+       ========================================================== */
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isRecording = false;
+    let speechInsertStartIndex = 0;
+    let speechCurrentInsertedLength = 0;
+
+    if (SpeechRecognition) {
+      recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'zh-HK';
+
+      recognition.onstart = () => {
+        isRecording = true;
+        btnVoiceToggle.classList.add('recording');
+        voiceStatusText.textContent = '聆聽中';
+        liveCaptionBar.style.display = 'inline-flex';
+        liveCaptionText.textContent = '準備聆聽...';
+
+        speechInsertStartIndex = editor.selectionStart;
+        speechCurrentInsertedLength = 0;
+        showToast('語音輸入開始（即時顯示）');
+      };
+
+      recognition.onresult = async (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const trans = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += trans;
+          } else {
+            interimTranscript += trans;
+          }
+        }
+
+        if (interimTranscript) {
+          const tradInterim = toTraditional(interimTranscript);
+          liveCaptionText.textContent = tradInterim;
+          replaceInterimText(tradInterim);
+        }
+
+        if (finalTranscript) {
+          let output = toTraditional(finalTranscript);
+          liveCaptionText.textContent = output;
+          if (isAiAutoPolish) {
+            output = localPolishRules(output);
+          }
+          replaceInterimText(output);
+          speechInsertStartIndex = speechInsertStartIndex + output.length;
+          speechCurrentInsertedLength = 0;
+        }
+      };
+
+      recognition.onerror = () => {
+        stopRecording();
+      };
+
+      recognition.onend = () => {
+        if (isRecording) {
+          try { recognition.start(); } catch(e) { stopRecording(); }
+        } else {
+          stopRecording();
+        }
+      };
+    }
+
+    function replaceInterimText(text) {
+      const val = editor.value;
+      const before = val.substring(0, speechInsertStartIndex);
+      const after = val.substring(speechInsertStartIndex + speechCurrentInsertedLength);
+
+      editor.value = before + text + after;
+      speechCurrentInsertedLength = text.length;
+      editor.selectionStart = editor.selectionEnd = speechInsertStartIndex + speechCurrentInsertedLength;
+      editor.scrollTop = editor.scrollHeight;
+
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+    }
+
+    function startRecording() {
+      if (!recognition) {
+        showToast('目前瀏覽器不支援 Web Speech API');
+        return;
+      }
+      try { recognition.start(); } catch (err) {}
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      btnVoiceToggle.classList.remove('recording');
+      voiceStatusText.textContent = '粵語語音';
+      liveCaptionBar.style.display = 'none';
+      speechCurrentInsertedLength = 0;
+      if (recognition) {
+        try { recognition.stop(); } catch(e){}
+      }
+    }
+
+    btnVoiceToggle.addEventListener('click', () => {
+      if (!isRecording) {
+        startRecording();
+      } else {
+        stopRecording();
+        showToast('已結束語音輸入');
+      }
+    });
+
+    /* ==========================================================
+       AI 潤色邏輯
+       ========================================================== */
+    function localPolishRules(raw) {
+      let text = raw;
+      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\\s]|$)/g, '');
+      text = text.replace(/(即係話|即係嗰個|咁樣嘅話|噉樣嘅話)/g, '即');
+      text = text.replace(/(然後呢|同埋呢|跟住呢)/g, '，');
+      text = text.replace(/(.{2,6}?)\\1+/g, '$1');
+      text = text.replace(/\\s+/g, '，');
+      if (!/[，。！？]$/.test(text.trim())) {
+        text = text.trim() + '。';
+      }
+      return text;
+    }
+
+    btnAiAutoToggle.addEventListener('click', () => {
+      isAiAutoPolish = !isAiAutoPolish;
+      btnAiAutoToggle.classList.toggle('active', isAiAutoPolish);
+      aiAutoStatusText.textContent = `AI 潤色: ${isAiAutoPolish ? '開' : '關'}`;
+      showToast(isAiAutoPolish ? '已啟用語音自動 AI 潤色' : '已關閉語音潤色');
+    });
+
+    btnAiPolishManual.addEventListener('click', () => {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const hasSelection = start !== end;
+      const targetText = hasSelection ? editor.value.substring(start, end) : editor.value;
+
+      if (!targetText.trim()) {
+        showToast('沒有可供潤色的內容');
+        return;
+      }
+
+      const polished = localPolishRules(toTraditional(targetText));
+      if (hasSelection) {
+        editor.value = editor.value.substring(0, start) + polished + editor.value.substring(end);
+        editor.selectionStart = start;
+        editor.selectionEnd = start + polished.length;
+      } else {
+        editor.value = polished;
+      }
+
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+      showToast('AI 潤色完成 ✨');
+    });
 
     /* ==========================================================
        剪下、複製、下載
@@ -1217,7 +1093,7 @@ ${content}`;
       item.addEventListener('click', () => {
         const ext = item.getAttribute('data-ext');
         currentFormat = ext;
-        downloadBtnText.textContent = `下載 .${ext}`;
+        downloadBtnText.textContent = `下載`;
         formatMenu.classList.remove('show');
         triggerDownload(ext);
       });
