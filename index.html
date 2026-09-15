@@ -47,6 +47,12 @@
       justify-content: space-between;
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
     .app-title {
       font-size: 15px;
       font-weight: 500;
@@ -64,6 +70,52 @@
       height: 7px;
       background: #8ea89d;
       border-radius: 50%;
+    }
+
+    /* Google 廣東話輸入法狀態切換按鈕 */
+    .ime-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--accent-soft);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+    }
+
+    .ime-pill:hover {
+      background: var(--accent-hover);
+      color: var(--text-main);
+    }
+
+    .ime-pill.active {
+      background: #e8efe9;
+      color: var(--primary-color);
+      border-color: #c4d4c7;
+      font-weight: 600;
+    }
+
+    .ime-pill .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: #cbd8cf;
+      font-size: 11px;
+      color: #2c382f;
+    }
+
+    .ime-pill.active .badge {
+      background: var(--primary-color);
+      color: #ffffff;
     }
 
     .status-info {
@@ -97,6 +149,13 @@
       box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.06);
     }
 
+    .editor-body {
+      flex: 1;
+      position: relative;
+      display: flex;
+      min-height: 0;
+    }
+
     textarea {
       flex: 1;
       width: 100%;
@@ -115,6 +174,82 @@
     textarea::placeholder {
       color: #adb5bd;
       font-weight: 300;
+    }
+
+    /* 廣東話輸入候選浮窗 */
+    .ime-panel {
+      display: none;
+      position: absolute;
+      bottom: 18px;
+      left: 28px;
+      background: #ffffff;
+      border: 1px solid #dcdfdc;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px -4px rgba(45, 49, 46, 0.12), 0 4px 12px -2px rgba(45, 49, 46, 0.05);
+      padding: 8px 12px;
+      z-index: 50;
+      min-width: 260px;
+      font-size: 14px;
+      backdrop-filter: blur(8px);
+      animation: imeFadeIn 0.15s ease-out;
+    }
+
+    @keyframes imeFadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ime-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 6px;
+      margin-bottom: 6px;
+      border-bottom: 1px solid #f1f3f2;
+    }
+
+    .ime-query {
+      font-family: 'Plus Jakarta Sans', monospace;
+      font-weight: 600;
+      color: var(--primary-color);
+      letter-spacing: 0.05em;
+    }
+
+    .ime-tip {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .ime-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .ime-item {
+      padding: 5px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--text-main);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .ime-item.active {
+      background-color: var(--accent-soft);
+      color: var(--primary-color);
+      font-weight: 500;
+    }
+
+    .ime-item:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .ime-item .num {
+      font-size: 11px;
+      color: #949a94;
     }
 
     /* 底部操作欄 */
@@ -243,7 +378,7 @@
       border-radius: 4px;
     }
 
-    /* 輕量提示浮窗 (Toast) */
+    /* 提示浮窗 (Toast) */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -281,16 +416,34 @@
 <body>
 
   <header>
-    <div class="app-title">
-      <span class="dot"></span>
-      <span>Notepad Canvas</span>
+    <div class="header-left">
+      <div class="app-title">
+        <span class="dot"></span>
+        <span>Notepad Canvas</span>
+      </div>
+      <!-- 廣東話輸入法切換按鈕 -->
+      <div class="ime-pill active" id="btnImeToggle" title="點擊切換 Google 廣東話 / 英文輸入">
+        <span class="badge">粵</span>
+        <span>Google 廣東話</span>
+      </div>
     </div>
     <div class="status-info" id="statusText">自動儲存於瀏覽器</div>
   </header>
 
   <main>
     <div class="editor-container">
-      <textarea id="editor" placeholder="在此處自由輸入文字、隨記、靈感或筆記..." autofocus></textarea>
+      <div class="editor-body">
+        <textarea id="editor" placeholder="在此處自由輸入文字...（已內建 Google 廣東話輸入法，如輸入 nei / sik / dim / hou）" autofocus></textarea>
+
+        <!-- 廣東話候選詞懸浮視窗 -->
+        <div class="ime-panel" id="imePanel">
+          <div class="ime-header">
+            <span class="ime-query" id="imeQueryText"></span>
+            <span class="ime-tip">數字 1-6 或 空白鍵選字</span>
+          </div>
+          <div class="ime-list" id="imeCandidates"></div>
+        </div>
+      </div>
       
       <div class="action-bar">
         <div class="stats" id="stats">0 字元 · 0 詞</div>
@@ -344,8 +497,16 @@
     const btnToggleMenu = document.getElementById('btnToggleMenu');
     const formatMenu = document.getElementById('formatMenu');
     const toast = document.getElementById('toast');
+    const btnImeToggle = document.getElementById('btnImeToggle');
+    const imePanel = document.getElementById('imePanel');
+    const imeQueryText = document.getElementById('imeQueryText');
+    const imeCandidates = document.getElementById('imeCandidates');
 
     let currentFormat = 'txt';
+    let isImeActive = true;
+    let imeBuffer = '';
+    let candidatesList = [];
+    let selectedIndex = 0;
 
     // 載入 LocalStorage 儲存之內容
     window.addEventListener('DOMContentLoaded', () => {
@@ -375,6 +536,156 @@
       setTimeout(() => {
         toast.classList.remove('show');
       }, 2000);
+    }
+
+    // 切換廣東話輸入法開關
+    btnImeToggle.addEventListener('click', () => {
+      isImeActive = !isImeActive;
+      btnImeToggle.classList.toggle('active', isImeActive);
+      if (!isImeActive) cancelIME();
+      showToast(isImeActive ? '已啟用 Google 廣東話輸入法' : '已關閉廣東話輸入法（原生鍵盤）');
+    });
+
+    // Google Input Tools 廣東話粵拼 API 請求 (JSONP)
+    function fetchGoogleCantonese(query) {
+      return new Promise((resolve) => {
+        const callbackName = 'google_ime_' + Math.floor(Math.random() * 1000000);
+        const script = document.createElement('script');
+        script.src = `https://inputtools.google.com/request?text=${encodeURIComponent(query)}&itc=yue-hant-t-i0-und&num=6&cp=0&cs=1&ie=utf-8&oe=utf-8&app=test&cb=${callbackName}`;
+        
+        window[callbackName] = function(data) {
+          cleanUp();
+          if (data && data[0] === 'SUCCESS' && data[1] && data[1][0]) {
+            resolve(data[1][0][1] || []);
+          } else {
+            resolve([]);
+          }
+        };
+
+        script.onerror = function() {
+          cleanUp();
+          resolve([]);
+        };
+
+        function cleanUp() {
+          delete window[callbackName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+        }
+
+        document.head.appendChild(script);
+      });
+    }
+
+    // 鍵盤事件監聽（廣東話輸入攔截）
+    editor.addEventListener('keydown', async (e) => {
+      if (!isImeActive) return;
+
+      if (imeBuffer.length > 0) {
+        // 空白鍵 或 Enter：選擇當前選中字詞
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          if (candidatesList.length > 0) {
+            commitCandidate(candidatesList[selectedIndex]);
+          } else {
+            commitCandidate(imeBuffer);
+          }
+          return;
+        }
+
+        // 數字鍵 1-6 快速選字
+        if (/^[1-6]$/.test(e.key)) {
+          const idx = parseInt(e.key) - 1;
+          if (idx < candidatesList.length) {
+            e.preventDefault();
+            commitCandidate(candidatesList[idx]);
+            return;
+          }
+        }
+
+        // 左右 / 上下方向鍵選字
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex + 1) % candidatesList.length;
+          renderCandidates();
+          return;
+        }
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          selectedIndex = (selectedIndex - 1 + candidatesList.length) % candidatesList.length;
+          renderCandidates();
+          return;
+        }
+
+        // 退格鍵
+        if (e.key === 'Backspace') {
+          e.preventDefault();
+          imeBuffer = imeBuffer.slice(0, -1);
+          if (imeBuffer.length === 0) {
+            cancelIME();
+          } else {
+            updateCandidates();
+          }
+          return;
+        }
+
+        // Escape 放棄輸入
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          cancelIME();
+          return;
+        }
+      }
+
+      // 攔截一般英文字母進行拼音收集
+      if (/^[a-z]$/i.test(e.key) && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        imeBuffer += e.key.toLowerCase();
+        updateCandidates();
+      }
+    });
+
+    async function updateCandidates() {
+      imeQueryText.textContent = imeBuffer;
+      imePanel.style.display = 'block';
+
+      const list = await fetchGoogleCantonese(imeBuffer);
+      candidatesList = list.length > 0 ? list : [imeBuffer];
+      selectedIndex = 0;
+      renderCandidates();
+    }
+
+    function renderCandidates() {
+      imeCandidates.innerHTML = '';
+      candidatesList.slice(0, 6).forEach((word, idx) => {
+        const item = document.createElement('div');
+        item.className = 'ime-item' + (idx === selectedIndex ? ' active' : '');
+        item.innerHTML = `<span class="num">${idx + 1}.</span><span>${word}</span>`;
+        item.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          commitCandidate(word);
+        });
+        imeCandidates.appendChild(item);
+      });
+      imePanel.style.display = 'block';
+    }
+
+    function commitCandidate(word) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const val = editor.value;
+
+      editor.value = val.substring(0, start) + word + val.substring(end);
+      editor.selectionStart = editor.selectionEnd = start + word.length;
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+      cancelIME();
+    }
+
+    function cancelIME() {
+      imeBuffer = '';
+      candidatesList = [];
+      selectedIndex = 0;
+      imePanel.style.display = 'none';
     }
 
     // 複製功能
