@@ -22,6 +22,7 @@
       --toast-bg: #2d312e;
       --toast-text: #ffffff;
       --recording-color: #dc2626;
+      --ai-color: #6366f1;
     }
 
     * {
@@ -51,7 +52,8 @@
     .header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .app-title {
@@ -73,8 +75,8 @@
       border-radius: 50%;
     }
 
-    /* 廣東話鍵盤開關 */
-    .ime-pill {
+    /* 頂部標籤膠囊通用樣式 */
+    .pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -90,19 +92,19 @@
       transition: all 0.2s ease;
     }
 
-    .ime-pill:hover {
+    .pill:hover {
       background: var(--accent-hover);
       color: var(--text-main);
     }
 
-    .ime-pill.active {
+    .pill.active {
       background: #e8efe9;
       color: var(--primary-color);
       border-color: #c4d4c7;
       font-weight: 600;
     }
 
-    .ime-pill .badge {
+    .pill .badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -114,37 +116,16 @@
       color: #2c382f;
     }
 
-    .ime-pill.active .badge {
+    .pill.active .badge {
       background: var(--primary-color);
       color: #ffffff;
     }
 
-    /* 語音輸入按鈕 */
-    .voice-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 500;
-      background: var(--accent-soft);
-      color: var(--text-muted);
-      border: 1px solid var(--border-color);
-      cursor: pointer;
-      user-select: none;
-      transition: all 0.2s ease;
-    }
-
-    .voice-pill:hover {
-      background: var(--accent-hover);
-      color: var(--text-main);
-    }
-
+    /* 語音按鈕錄音中狀態 */
     .voice-pill.recording {
-      background: #fee2e2;
-      color: var(--recording-color);
-      border-color: #fca5a5;
+      background: #fee2e2 !important;
+      color: var(--recording-color) !important;
+      border-color: #fca5a5 !important;
       font-weight: 600;
       animation: pulseRecording 1.4s infinite;
     }
@@ -152,6 +133,13 @@
     @keyframes pulseRecording {
       0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
       50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+    }
+
+    /* AI 修飾開關狀態 */
+    .ai-pill.active {
+      background: #eef2ff !important;
+      color: #4f46e5 !important;
+      border-color: #c7d2fe !important;
     }
 
     .status-info {
@@ -210,6 +198,49 @@
     textarea::placeholder {
       color: #adb5bd;
       font-weight: 300;
+    }
+
+    /* 即時聽寫浮動字幕提示列 (Live Caption Bar) */
+    .live-caption-bar {
+      display: none;
+      position: absolute;
+      left: 28px;
+      bottom: 24px;
+      max-width: calc(100% - 56px);
+      background: rgba(45, 49, 46, 0.88);
+      color: #f3f4f6;
+      padding: 7px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      backdrop-filter: blur(6px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+      pointer-events: none;
+      z-index: 40;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      animation: liveFadeIn 0.15s ease-out;
+    }
+
+    @keyframes liveFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .live-dot {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+      animation: liveBlink 1s infinite;
+    }
+
+    @keyframes liveBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
 
     /* 廣東話輸入候選浮窗 */
@@ -338,6 +369,17 @@
       border-color: #d7ded7;
     }
 
+    .btn-ai-polish {
+      background-color: #f5f3ff;
+      color: #4f46e5;
+      border-color: #e0e7ff;
+    }
+
+    .btn-ai-polish:hover {
+      background-color: #ede9fe;
+      border-color: #c7d2fe;
+    }
+
     .btn-download-group {
       display: inline-flex;
       position: relative;
@@ -447,6 +489,60 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+
+    /* 設定 API Key Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(2px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 16px;
+      padding: 24px;
+      width: 90%;
+      max-width: 440px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+    }
+
+    .modal-box h3 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .modal-box p {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+
+    .modal-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
   </style>
 </head>
 <body>
@@ -459,20 +555,28 @@
       </div>
       
       <!-- 廣東話輸入法 (粵拼) 切換 -->
-      <div class="ime-pill active" id="btnImeToggle" title="點擊切換 Google 廣東話 / 英文輸入">
+      <div class="pill active" id="btnImeToggle" title="點擊切換 Google 廣東話 / 英文輸入">
         <span class="badge">粵</span>
         <span>粵拼鍵盤</span>
       </div>
 
       <!-- 廣東話語音輸入切換 -->
-      <div class="voice-pill" id="btnVoiceToggle" title="點擊開始廣東話語音輸入（自動轉繁體中文）">
-        <svg viewBox="0 0 24 24" id="micIcon">
+      <div class="pill voice-pill" id="btnVoiceToggle" title="點擊開始廣東話語音輸入（即時逐字顯示）">
+        <svg viewBox="0 0 24 24">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
           <line x1="12" y1="19" x2="12" y2="23"></line>
           <line x1="8" y1="23" x2="16" y2="23"></line>
         </svg>
         <span id="voiceStatusText">粵語語音</span>
+      </div>
+
+      <!-- AI 即時修正開關 -->
+      <div class="pill ai-pill active" id="btnAiAutoToggle" title="語音停頓時是否自動透過 AI 潤色語句">
+        <svg viewBox="0 0 24 24" style="width: 13px; height: 13px;">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <span id="aiAutoStatusText">AI 語音潤色: 開</span>
       </div>
     </div>
     <div class="status-info" id="statusText">自動儲存於瀏覽器</div>
@@ -481,7 +585,13 @@
   <main>
     <div class="editor-container">
       <div class="editor-body">
-        <textarea id="editor" placeholder="在此處自由輸入文字...（支援廣東話語音轉繁體中文與粵拼輸入法）" autofocus></textarea>
+        <textarea id="editor" placeholder="在此處自由輸入文字...（語音輸入支援一邊講一邊即時出字）" autofocus></textarea>
+
+        <!-- 即時語音聽寫提示浮動字幕條 -->
+        <div class="live-caption-bar" id="liveCaptionBar">
+          <span class="live-dot"></span>
+          <span id="liveCaptionText">正在聽取...</span>
+        </div>
 
         <!-- 廣東話候選詞懸浮視窗 -->
         <div class="ime-panel" id="imePanel">
@@ -496,6 +606,14 @@
       <div class="action-bar">
         <div class="stats" id="stats">0 字元 · 0 詞</div>
         <div class="buttons">
+          <!-- 一鍵 AI 潤色按鈕（針對已選取或全文） -->
+          <button type="button" class="btn-ai-polish" id="btnAiPolishManual" title="使用 AI 將內容修飾得更通順連貫">
+            <svg viewBox="0 0 24 24">
+              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+            </svg>
+            AI 潤色
+          </button>
+
           <!-- 剪下按鈕 -->
           <button type="button" class="btn-action" id="btnCut" title="剪下至剪貼簿">
             <svg viewBox="0 0 24 24">
@@ -548,7 +666,19 @@
 
   <div class="toast" id="toast">已複製到剪貼簿</div>
 
-  <!-- 引入輕量純前端簡轉繁引擎，確保語音輸出 100% 正體/繁體中文 -->
+  <!-- API Key 設定彈窗 -->
+  <div class="modal-backdrop" id="apiKeyModal">
+    <div class="modal-box">
+      <h3>設定 Google Gemini API Key（選填）</h3>
+      <p>若希望使用 Gemini 大模型進行更高品質的 AI 語意潤色，請填入 API Key。若留空，系統將直接以本地即時規則進行修飾。</p>
+      <input type="password" id="geminiApiKeyInput" placeholder="AIzaSy..." autocomplete="off">
+      <div class="modal-actions">
+        <button class="btn-action" id="btnModalCancel">使用內建引擎</button>
+        <button class="btn-download-main" id="btnModalSave">儲存設定</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
 
   <script>
@@ -562,38 +692,52 @@
     const formatMenu = document.getElementById('formatMenu');
     const toast = document.getElementById('toast');
 
-    // 鍵盤輸入法元素
+    // 聽寫字幕組件
+    const liveCaptionBar = document.getElementById('liveCaptionBar');
+    const liveCaptionText = document.getElementById('liveCaptionText');
+
+    // 輸入法與語音
     const btnImeToggle = document.getElementById('btnImeToggle');
     const imePanel = document.getElementById('imePanel');
     const imeQueryText = document.getElementById('imeQueryText');
     const imeCandidates = document.getElementById('imeCandidates');
-
-    // 語音輸入元素
     const btnVoiceToggle = document.getElementById('btnVoiceToggle');
     const voiceStatusText = document.getElementById('voiceStatusText');
+
+    // AI 修飾組件
+    const btnAiAutoToggle = document.getElementById('btnAiAutoToggle');
+    const aiAutoStatusText = document.getElementById('aiAutoStatusText');
+    const btnAiPolishManual = document.getElementById('btnAiPolishManual');
+    const apiKeyModal = document.getElementById('apiKeyModal');
+    const geminiApiKeyInput = document.getElementById('geminiApiKeyInput');
+    const btnModalCancel = document.getElementById('btnModalCancel');
+    const btnModalSave = document.getElementById('btnModalSave');
 
     let currentFormat = 'txt';
     let isImeActive = true;
     let imeBuffer = '';
     let candidatesList = [];
     let selectedIndex = 0;
+    let isAiAutoPolish = true;
 
-    // 初始化簡轉繁轉換器（簡體/異體 -> 香港標準繁體）
+    // 簡轉繁模組
     let toTraditional = (text) => text;
     if (window.OpenCC) {
       toTraditional = OpenCC.Converter({ from: 'cn', to: 'hk' });
     }
 
-    // 載入 LocalStorage 儲存內容
     window.addEventListener('DOMContentLoaded', () => {
       const saved = localStorage.getItem('zen_notepad_content');
       if (saved) {
         editor.value = saved;
         updateStats();
       }
+      const savedKey = localStorage.getItem('gemini_api_key');
+      if (savedKey) {
+        geminiApiKeyInput.value = savedKey;
+      }
     });
 
-    // 鍵入更新統計與儲存
     editor.addEventListener('input', () => {
       updateStats();
       localStorage.setItem('zen_notepad_content', editor.value);
@@ -602,7 +746,7 @@
     function updateStats() {
       const text = editor.value;
       const chars = text.length;
-      const words = text.trim() ? (text.match(/\\S+/g) || []).length : 0;
+      const words = text.trim() ? (text.match(/\S+/g) || []).length : 0;
       stats.textContent = `${chars} 字元 · ${words} 詞`;
     }
 
@@ -615,123 +759,195 @@
     }
 
     /* ==========================================================
-       剪下與複製功能
+       AI 潤色修飾核心
        ========================================================== */
-    // 剪下邏輯：選取時剪下選取內容，未選取時剪下全部
-    btnCut.addEventListener('click', async () => {
-      if (!editor.value) {
-        showToast('沒有內容可剪下');
-        return;
+    function localPolishRules(raw) {
+      let text = raw;
+      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\s]|$)/g, '');
+      text = text.replace(/(即係話|即係嗰個|咁樣嘅話|噉樣嘅話)/g, '即');
+      text = text.replace(/(然後呢|同埋呢|跟住呢)/g, '，');
+      text = text.replace(/(.{2,6}?)\1+/g, '$1');
+      text = text.replace(/\s+/g, '，');
+      if (!/[，。！？]$/.test(text.trim())) {
+        text = text.trim() + '。';
       }
+      return text;
+    }
 
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      let textToCut = '';
-      let isPartial = false;
+    async function polishWithGemini(content, apiKey) {
+      const prompt = `你是一個專業的繁體中文編輯助手。請將以下由香港廣東話語音輸入的文字，修飾為通順、連貫、自然的繁體中文書面語（香港常用標準繁體）：
+1. 修正口語語病、冗言贅字與重複口誤。
+2. 加入適當標點符號。
+3. 嚴格保持原意，不添加額外評論或解釋。
+4. 僅直接輸出修訂後的文字。
 
-      if (start !== end) {
-        textToCut = editor.value.substring(start, end);
-        isPartial = true;
-      } else {
-        textToCut = editor.value;
+原文內容：
+${content}`;
+
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }]
+        })
+      });
+
+      if (!res.ok) throw new Error('API 呼叫失敗');
+      const data = await res.json();
+      const polished = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      return polished ? polished.trim() : content;
+    }
+
+    async function polishText(rawText) {
+      const apiKey = localStorage.getItem('gemini_api_key');
+      const baseCleaned = localPolishRules(toTraditional(rawText));
+
+      if (apiKey) {
+        try {
+          const aiResult = await polishWithGemini(rawText, apiKey);
+          return toTraditional(aiResult);
+        } catch (err) {
+          console.warn('Gemini 潤色失敗，切回本地智慧修飾', err);
+          return baseCleaned;
+        }
       }
+      return baseCleaned;
+    }
 
-      if (!textToCut) {
-        showToast('沒有內容可剪下');
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(textToCut);
-      } catch (err) {
-        // 備用複製方案
-        const temp = document.createElement('textarea');
-        temp.value = textToCut;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand('copy');
-        document.body.removeChild(temp);
-      }
-
-      if (isPartial) {
-        editor.value = editor.value.substring(0, start) + editor.value.substring(end);
-        editor.selectionStart = editor.selectionEnd = start;
-      } else {
-        editor.value = '';
-      }
-
-      editor.focus();
-      updateStats();
-      localStorage.setItem('zen_notepad_content', editor.value);
-      showToast('已剪下至剪貼簿 ✂️');
+    btnAiAutoToggle.addEventListener('click', () => {
+      isAiAutoPolish = !isAiAutoPolish;
+      btnAiAutoToggle.classList.toggle('active', isAiAutoPolish);
+      aiAutoStatusText.textContent = `AI 語音潤色: ${isAiAutoPolish ? '開' : '關'}`;
+      showToast(isAiAutoPolish ? '已啟用語音自動 AI 潤色' : '已關閉語音潤色（原樣輸出）');
     });
 
-    // 複製邏輯
-    btnCopy.addEventListener('click', async () => {
-      if (!editor.value.trim()) {
-        showToast('沒有內容可複製');
+    btnAiPolishManual.addEventListener('click', async () => {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const hasSelection = start !== end;
+      const targetText = hasSelection ? editor.value.substring(start, end) : editor.value;
+
+      if (!targetText.trim()) {
+        showToast('沒有可供潤色的內容');
         return;
       }
-      try {
-        await navigator.clipboard.writeText(editor.value);
-        showToast('已複製到剪貼簿 ✨');
-      } catch (err) {
-        editor.select();
-        document.execCommand('copy');
-        showToast('已複製到剪貼簿 ✨');
+
+      showToast('正在潤色優化文字...');
+      const polished = await polishText(targetText);
+
+      if (hasSelection) {
+        editor.value = editor.value.substring(0, start) + polished + editor.value.substring(end);
+        editor.selectionStart = start;
+        editor.selectionEnd = start + polished.length;
+      } else {
+        editor.value = polished;
       }
+
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+      showToast('AI 潤色完成 ✨');
+    });
+
+    btnModalSave.addEventListener('click', () => {
+      const key = geminiApiKeyInput.value.trim();
+      if (key) {
+        localStorage.setItem('gemini_api_key', key);
+        showToast('已保存 Gemini API Key');
+      } else {
+        localStorage.removeItem('gemini_api_key');
+        showToast('已清除 API Key');
+      }
+      apiKeyModal.classList.remove('show');
+    });
+
+    btnModalCancel.addEventListener('click', () => {
+      apiKeyModal.classList.remove('show');
     });
 
     /* ==========================================================
-       廣東話語音輸入（Web Speech API - zh-HK）
-       + 自動即時轉為繁體中文（香港/台灣正體標準）
+       即時語音辨識核心（Web Speech API - 逐字即時回饋）
+       interimResults: true -> 即時串流顯示
        ========================================================== */
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
     let isRecording = false;
+    let speechInsertStartIndex = 0; // 記錄本次說話開始時的游標位置
+    let speechCurrentInsertedLength = 0; // 記錄當前正在即時更新的文字長度
 
     if (SpeechRecognition) {
       recognition = new SpeechRecognition();
       recognition.continuous = true;
-      recognition.interimResults = false;
+      recognition.interimResults = true; // 關鍵：開啟即時串流中間結果
       recognition.lang = 'zh-HK';
 
       recognition.onstart = () => {
         isRecording = true;
         btnVoiceToggle.classList.add('recording');
         voiceStatusText.textContent = '聆聽中...';
-        showToast('正在聆聽廣東話，將自動輸出繁體中文...');
+        liveCaptionBar.style.display = 'inline-flex';
+        liveCaptionText.textContent = '準備聆聽...';
+
+        // 鎖定起始游標位置
+        speechInsertStartIndex = editor.selectionStart;
+        speechCurrentInsertedLength = 0;
+        showToast('開始廣東話語音輸入（即時顯示）');
       };
 
-      recognition.onresult = (event) => {
-        let transcript = '';
+      recognition.onresult = async (event) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
         for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const trans = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            transcript += event.results[i][0].transcript;
+            finalTranscript += trans;
+          } else {
+            interimTranscript += trans;
           }
         }
-        if (transcript) {
-          const traditionalText = toTraditional(transcript);
-          insertTextAtCursor(traditionalText);
+
+        // 1. 如果有即時暫定結果（正在講、尚未停頓）：即時更新到畫面上
+        if (interimTranscript) {
+          const tradInterim = toTraditional(interimTranscript);
+          liveCaptionText.textContent = tradInterim;
+
+          // 即時覆蓋替換「當前未定稿句」
+          replaceInterimText(tradInterim);
+        }
+
+        // 2. 如果一句講完（產生 Final 結果）：執行定稿與 AI 潤色
+        if (finalTranscript) {
+          let output = toTraditional(finalTranscript);
+          liveCaptionText.textContent = output;
+
+          // 進行自動潤色
+          if (isAiAutoPolish) {
+            output = await polishText(output);
+          }
+
+          // 定稿覆蓋上屏
+          replaceInterimText(output);
+
+          // 推進游標起點，準備迎接下一句
+          speechInsertStartIndex = speechInsertStartIndex + output.length;
+          speechCurrentInsertedLength = 0;
         }
       };
 
       recognition.onerror = (event) => {
         console.error('語音識別錯誤:', event.error);
         if (event.error === 'not-allowed') {
-          showToast('請允許瀏覽器麥克風權限以使用語音輸入');
-        } else {
-          showToast(`語音識別中斷: ${event.error}`);
+          showToast('請允許麥克風權限以使用語音功能');
         }
         stopRecording();
       };
 
       recognition.onend = () => {
         if (isRecording) {
-          try {
-            recognition.start();
-          } catch (err) {
-            stopRecording();
+          try { 
+            recognition.start(); 
+          } catch(e) { 
+            stopRecording(); 
           }
         } else {
           stopRecording();
@@ -739,22 +955,39 @@
       };
     }
 
+    // 將即時聽到的文字直接寫入 textarea（動態取代未定稿文字）
+    function replaceInterimText(text) {
+      const val = editor.value;
+      const before = val.substring(0, speechInsertStartIndex);
+      const after = val.substring(speechInsertStartIndex + speechCurrentInsertedLength);
+
+      editor.value = before + text + after;
+      speechCurrentInsertedLength = text.length;
+
+      // 將游標放置在最新字元後方並自動滾動
+      editor.selectionStart = editor.selectionEnd = speechInsertStartIndex + speechCurrentInsertedLength;
+      editor.scrollTop = editor.scrollHeight;
+
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+    }
+
     function startRecording() {
       if (!recognition) {
         showToast('目前瀏覽器不支援 Web Speech API，建議使用 Chrome 或 Edge');
         return;
       }
-      try {
-        recognition.start();
-      } catch (err) {
-        console.warn(err);
-      }
+      try { 
+        recognition.start(); 
+      } catch (err) {}
     }
 
     function stopRecording() {
       isRecording = false;
       btnVoiceToggle.classList.remove('recording');
       voiceStatusText.textContent = '粵語語音';
+      liveCaptionBar.style.display = 'none';
+      speechCurrentInsertedLength = 0;
       if (recognition) {
         try { recognition.stop(); } catch(e){}
       }
@@ -769,19 +1002,8 @@
       }
     });
 
-    function insertTextAtCursor(text) {
-      const start = editor.selectionStart;
-      const end = editor.selectionEnd;
-      const val = editor.value;
-
-      editor.value = val.substring(0, start) + text + val.substring(end);
-      editor.selectionStart = editor.selectionEnd = start + text.length;
-      updateStats();
-      localStorage.setItem('zen_notepad_content', editor.value);
-    }
-
     /* ==========================================================
-       Google 廣東話粵拼輸入法 (JSONP)
+       Google 廣東話粵拼鍵盤 (JSONP)
        ========================================================== */
     btnImeToggle.addEventListener('click', () => {
       isImeActive = !isImeActive;
@@ -825,11 +1047,7 @@
       if (imeBuffer.length > 0) {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
-          if (candidatesList.length > 0) {
-            commitCandidate(candidatesList[selectedIndex]);
-          } else {
-            commitCandidate(imeBuffer);
-          }
+          commitCandidate(candidatesList.length > 0 ? candidatesList[selectedIndex] : imeBuffer);
           return;
         }
 
@@ -918,24 +1136,64 @@
     }
 
     /* ==========================================================
-       檔案下載功能
+       剪下、複製、下載
        ========================================================== */
+    btnCut.addEventListener('click', async () => {
+      if (!editor.value) {
+        showToast('沒有內容可剪下');
+        return;
+      }
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      let textToCut = start !== end ? editor.value.substring(start, end) : editor.value;
+
+      try {
+        await navigator.clipboard.writeText(textToCut);
+      } catch (err) {
+        editor.select();
+        document.execCommand('copy');
+      }
+
+      if (start !== end) {
+        editor.value = editor.value.substring(0, start) + editor.value.substring(end);
+        editor.selectionStart = editor.selectionEnd = start;
+      } else {
+        editor.value = '';
+      }
+      editor.focus();
+      updateStats();
+      localStorage.setItem('zen_notepad_content', editor.value);
+      showToast('已剪下至剪貼簿 ✂️');
+    });
+
+    btnCopy.addEventListener('click', async () => {
+      if (!editor.value.trim()) {
+        showToast('沒有內容可複製');
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(editor.value);
+        showToast('已複製到剪貼簿 ✨');
+      } catch (err) {
+        editor.select();
+        document.execCommand('copy');
+        showToast('已複製到剪貼簿 ✨');
+      }
+    });
+
     function triggerDownload(ext) {
       const content = editor.value;
       if (!content.trim()) {
         showToast('沒有內容可下載');
         return;
       }
-
       const mimeTypes = {
         txt: 'text/plain;charset=utf-8',
         md: 'text/markdown;charset=utf-8'
       };
-
       const blob = new Blob([content], { type: mimeTypes[ext] || 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      
       const now = new Date();
       const timestamp = now.toISOString().slice(0, 10) + '_' + 
                         String(now.getHours()).padStart(2, '0') + 
@@ -950,17 +1208,13 @@
       showToast(`已下載為 .${ext} 檔案`);
     }
 
-    btnDownload.addEventListener('click', () => {
-      triggerDownload(currentFormat);
-    });
-
+    btnDownload.addEventListener('click', () => triggerDownload(currentFormat));
     btnToggleMenu.addEventListener('click', (e) => {
       e.stopPropagation();
       formatMenu.classList.toggle('show');
     });
-
     document.querySelectorAll('.dropdown-item').forEach(item => {
-      item.addEventListener('click', (e) => {
+      item.addEventListener('click', () => {
         const ext = item.getAttribute('data-ext');
         currentFormat = ext;
         downloadBtnText.textContent = `下載 .${ext}`;
@@ -968,7 +1222,6 @@
         triggerDownload(ext);
       });
     });
-
     document.addEventListener('click', (e) => {
       if (!formatMenu.contains(e.target) && e.target !== btnToggleMenu) {
         formatMenu.classList.remove('show');
