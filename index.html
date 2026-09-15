@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, interactive-widget=resizes-content">
   <title>極簡純淨筆記 Minimal Notepad</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,28 +33,43 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    body {
-      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
+    /* 鎖死 html 與 body，杜絕整個網頁上下回彈滾動 */
+    html, body {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
       height: 100vh;
       height: 100dvh;
+      overflow: hidden;
+      touch-action: none; /* 禁止整頁下拉刷新或滑動 */
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
+    }
+
+    .app-root {
+      width: 100%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
+    /* 頂部 Header 緊湊化 */
     header {
-      padding: 12px 16px 8px;
+      padding: 8px 14px 6px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 6px;
       flex-shrink: 0;
+      background: var(--bg-color);
+      z-index: 10;
     }
 
     @media (min-width: 640px) {
       header {
-        padding: 18px 24px 12px;
+        padding: 16px 24px 10px;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
@@ -68,35 +83,36 @@
     }
 
     .app-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       color: var(--text-muted);
       text-transform: uppercase;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
     .app-title span.dot {
       display: inline-block;
-      width: 7px;
-      height: 7px;
+      width: 6px;
+      height: 6px;
       background: #8ea89d;
       border-radius: 50%;
     }
 
     .status-info {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
     }
 
     .pill-group {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       overflow-x: auto;
       padding-bottom: 2px;
+      touch-action: pan-x;
       scrollbar-width: none;
     }
     .pill-group::-webkit-scrollbar { display: none; }
@@ -104,10 +120,10 @@
     .pill {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 5px 12px;
+      gap: 4px;
+      padding: 4px 10px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       background: var(--accent-soft);
       color: var(--text-muted);
@@ -131,11 +147,11 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       border-radius: 50%;
       background: #cbd8cf;
-      font-size: 10px;
+      font-size: 9px;
       color: #2c382f;
     }
     .pill.active .badge {
@@ -152,7 +168,7 @@
     }
     @keyframes pulseRecording {
       0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.35); }
-      50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+      50% { box-shadow: 0 0 0 5px rgba(220, 38, 38, 0); }
     }
 
     .ai-pill.active {
@@ -161,27 +177,31 @@
       border-color: #c7d2fe !important;
     }
 
+    /* 主工作區：嚴格貼合可視區域 */
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 0 12px 14px;
-      min-height: 0;
+      padding: 0 10px 8px;
+      min-height: 0; /* 關鍵：允許 flex item 自由縮小 */
+      overflow: hidden;
     }
+
     @media (min-width: 640px) {
-      main { padding: 0 24px 20px; }
+      main { padding: 0 24px 16px; }
     }
 
     .editor-container {
       flex: 1;
       background: var(--card-bg);
-      border-radius: 14px;
+      border-radius: 12px;
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-subtle);
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
+      min-height: 0; /* 縮小容忍 */
     }
 
     .editor-body {
@@ -190,38 +210,45 @@
       display: flex;
       flex-direction: column;
       min-height: 0;
+      overflow: hidden;
     }
 
+    /* 輸入框自身獨立滾動，外界零滑動 */
     textarea {
       flex: 1;
       width: 100%;
       height: 100%;
-      padding: 16px 18px;
+      padding: 12px 14px;
       font-family: inherit;
-      font-size: 16px;
-      line-height: 1.65;
+      font-size: 15px;
+      line-height: 1.6;
       color: var(--text-main);
       background: transparent;
       border: none;
       outline: none;
       resize: none;
+      overflow-y: auto;
+      touch-action: pan-y; /* 僅允許輸入框內容內部上下捲動 */
+      -webkit-overflow-scrolling: touch;
     }
+
     @media (min-width: 640px) {
       textarea {
-        padding: 24px 28px;
+        padding: 20px 24px;
         font-size: 16px;
         line-height: 1.75;
       }
     }
+
     textarea::placeholder { color: #adb5bd; font-weight: 300; }
 
-    /* 頂部嵌入式/懸浮式候選字 Bar（解決手機鍵盤遮擋與點擊失焦問題） */
+    /* 緊湊型候選字列 */
     .ime-candidate-bar {
       display: none;
       background: #ffffff;
       border-top: 1px solid var(--border-color);
-      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
-      padding: 6px 10px;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
+      padding: 4px 8px;
       z-index: 50;
       flex-shrink: 0;
       touch-action: manipulation;
@@ -231,22 +258,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 2px 6px 4px 6px;
+      padding: 1px 4px 3px 4px;
     }
 
     .ime-query {
       font-family: 'Plus Jakarta Sans', monospace;
       font-weight: 600;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--primary-color);
-      letter-spacing: 0.05em;
     }
 
     .ime-close-btn {
       font-size: 11px;
       color: var(--text-muted);
       cursor: pointer;
-      padding: 2px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
       background: #f1f3f2;
     }
@@ -254,19 +280,20 @@
     .ime-list {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       overflow-x: auto;
-      padding: 4px 0;
+      padding: 3px 0;
+      touch-action: pan-x;
       scrollbar-width: none;
     }
     .ime-list::-webkit-scrollbar { display: none; }
 
     .ime-item {
-      padding: 8px 14px;
-      border-radius: 8px;
+      padding: 6px 12px;
+      border-radius: 6px;
       background: #f4f6f4;
       color: var(--text-main);
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
@@ -275,8 +302,7 @@
       -webkit-user-select: none;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      transition: background 0.12s ease;
+      gap: 3px;
     }
     .ime-item:active {
       background: #dfe6df;
@@ -288,36 +314,35 @@
       border: 1px solid #cbd7cd;
     }
     .ime-item .num {
-      font-size: 11px;
+      font-size: 10px;
       color: #949a94;
     }
 
-    /* 語音聽寫字幕條 */
+    /* 即時聽寫浮動字幕 */
     .live-caption-bar {
       display: none;
       position: absolute;
-      left: 14px;
-      bottom: 14px;
-      max-width: calc(100% - 28px);
-      background: rgba(45, 49, 46, 0.9);
+      left: 12px;
+      bottom: 12px;
+      max-width: calc(100% - 24px);
+      background: rgba(45, 49, 46, 0.92);
       color: #f3f4f6;
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11px;
       backdrop-filter: blur(6px);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
       pointer-events: none;
       z-index: 40;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .live-dot {
       display: inline-block;
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
       background: #ef4444;
       animation: liveBlink 1s infinite;
@@ -327,58 +352,61 @@
       50% { opacity: 0.3; }
     }
 
-    /* 底部操作欄 */
+    /* 底部操作欄：手機鍵盤彈出時仍死守底部，極小化空間消耗 */
     .action-bar {
-      padding: 10px 14px;
+      padding: 6px 10px;
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
       border-top: 1px solid #f1f3f2;
       background: #fdfdfc;
-      border-bottom-left-radius: 14px;
-      border-bottom-right-radius: 14px;
+      border-bottom-left-radius: 12px;
+      border-bottom-right-radius: 12px;
       flex-shrink: 0;
     }
+
     @media (min-width: 640px) {
       .action-bar {
-        padding: 12px 20px;
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
+        padding: 10px 20px;
         gap: 12px;
       }
     }
 
     .stats {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-muted);
-      letter-spacing: 0.02em;
-      text-align: center;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90px;
     }
     @media (min-width: 640px) {
-      .stats { text-align: left; font-size: 13px; }
+      .stats { max-width: none; font-size: 13px; }
     }
 
     .buttons {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      width: 100%;
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 1;
     }
     @media (min-width: 640px) {
-      .buttons { display: flex; width: auto; gap: 8px; }
+      .buttons { gap: 8px; flex: none; }
     }
 
     button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 4px;
       font-family: inherit;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
-      padding: 8px 10px;
-      border-radius: 8px;
+      padding: 6px 9px;
+      border-radius: 6px;
       border: 1px solid transparent;
       cursor: pointer;
       transition: all 0.16s ease;
@@ -386,9 +414,9 @@
       white-space: nowrap;
     }
     @media (min-width: 640px) {
-      button { padding: 8px 15px; font-size: 13px; }
+      button { padding: 8px 14px; font-size: 13px; border-radius: 8px; }
     }
-    button:active { transform: scale(0.97); }
+    button:active { transform: scale(0.96); }
 
     .btn-action {
       background-color: var(--accent-soft);
@@ -402,22 +430,17 @@
     }
 
     .btn-download-group {
-      display: flex;
+      display: inline-flex;
       position: relative;
-      width: 100%;
-    }
-    @media (min-width: 640px) {
-      .btn-download-group { width: auto; }
     }
 
     .btn-download-main {
-      flex: 1;
       background-color: var(--primary-color);
       color: #ffffff;
       border-top-right-radius: 0;
       border-bottom-right-radius: 0;
       padding-right: 6px;
-      padding-left: 8px;
+      padding-left: 7px;
     }
     .btn-download-main:hover { background-color: var(--primary-hover); }
 
@@ -426,29 +449,29 @@
       color: #ffffff;
       border-top-left-radius: 0;
       border-bottom-left-radius: 0;
-      padding: 8px 7px;
+      padding: 6px 6px;
       border-left: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .dropdown-menu {
       position: absolute;
-      bottom: calc(100% + 8px);
+      bottom: calc(100% + 6px);
       right: 0;
       background: #ffffff;
       border: 1px solid var(--border-color);
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
       display: none;
       flex-direction: column;
-      min-width: 135px;
+      min-width: 130px;
       overflow: hidden;
       z-index: 60;
     }
     .dropdown-menu.show { display: flex; }
 
     .dropdown-item {
-      padding: 10px 14px;
-      font-size: 13px;
+      padding: 8px 12px;
+      font-size: 12px;
       color: var(--text-main);
       background: transparent;
       border: none;
@@ -461,29 +484,29 @@
       border-radius: 0;
     }
     .dropdown-item span.ext {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--text-muted);
       background: #edf1ee;
-      padding: 2px 5px;
+      padding: 1px 4px;
       border-radius: 4px;
     }
 
     .toast {
       position: fixed;
-      bottom: 24px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%) translateY(20px);
       background: var(--toast-bg);
       color: var(--toast-text);
-      padding: 9px 18px;
+      padding: 7px 16px;
       border-radius: 30px;
-      font-size: 13px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      font-size: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.18);
       opacity: 0;
       pointer-events: none;
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.2s ease;
       z-index: 100;
-      max-width: 90%;
+      max-width: 85%;
       text-align: center;
     }
     .toast.show {
@@ -492,8 +515,8 @@
     }
 
     svg {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       stroke-width: 2;
       stroke: currentColor;
       fill: none;
@@ -505,120 +528,122 @@
 </head>
 <body>
 
-  <header>
-    <div class="header-top">
-      <div class="app-title">
-        <span class="dot"></span>
-        <span>Notepad Canvas</span>
-      </div>
-      <div class="status-info" id="statusText">自動儲存中</div>
-    </div>
-    
-    <div class="pill-group">
-      <div class="pill active" id="btnImeToggle" title="切換 Google 廣東話 / 英文輸入">
-        <span class="badge">粵</span>
-        <span>粵拼鍵盤</span>
-      </div>
-
-      <div class="pill voice-pill" id="btnVoiceToggle" title="廣東話語音輸入">
-        <svg viewBox="0 0 24 24">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-          <line x1="12" y1="19" x2="12" y2="23"></line>
-          <line x1="8" y1="23" x2="16" y2="23"></line>
-        </svg>
-        <span id="voiceStatusText">粵語語音</span>
-      </div>
-
-      <div class="pill ai-pill active" id="btnAiAutoToggle" title="AI 潤色開關">
-        <svg viewBox="0 0 24 24">
-          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-        </svg>
-        <span id="aiAutoStatusText">AI 潤色: 開</span>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <div class="editor-container">
-      <div class="editor-body">
-        <textarea id="editor" placeholder="在此處自由輸入文字...（手機支援輸入粵拼，在下方選字條點選）" autofocus></textarea>
-
-        <!-- 即時語音字幕條 -->
-        <div class="live-caption-bar" id="liveCaptionBar">
-          <span class="live-dot"></span>
-          <span id="liveCaptionText">正在聽取...</span>
+  <div class="app-root" id="appRoot">
+    <header>
+      <div class="header-top">
+        <div class="app-title">
+          <span class="dot"></span>
+          <span>Notepad Canvas</span>
         </div>
-      </div>
-
-      <!-- 廣東話候選詞專屬工具列（貼合輸入框底部，防鍵盤遮蔽與失焦） -->
-      <div class="ime-candidate-bar" id="imePanel">
-        <div class="ime-header">
-          <span class="ime-query" id="imeQueryText">nei</span>
-          <span class="ime-close-btn" id="imeCloseBtn">關閉</span>
-        </div>
-        <div class="ime-list" id="imeCandidates"></div>
+        <div class="status-info" id="statusText">自動儲存中</div>
       </div>
       
-      <!-- 底部按鈕操作欄 -->
-      <div class="action-bar">
-        <div class="stats" id="stats">0 字元 · 0 詞</div>
-        <div class="buttons">
-          <button type="button" class="btn-ai-polish" id="btnAiPolishManual" title="AI 優化修飾">
-            <svg viewBox="0 0 24 24">
-              <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-            </svg>
-            <span>潤色</span>
-          </button>
+      <div class="pill-group">
+        <div class="pill active" id="btnImeToggle" title="切換 Google 廣東話 / 英文輸入">
+          <span class="badge">粵</span>
+          <span>粵拼鍵盤</span>
+        </div>
 
-          <button type="button" class="btn-action" id="btnCut" title="剪下">
-            <svg viewBox="0 0 24 24">
-              <circle cx="6" cy="6" r="3"></circle>
-              <circle cx="6" cy="18" r="3"></circle>
-              <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
-              <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
-              <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
-            </svg>
-            <span>剪下</span>
-          </button>
+        <div class="pill voice-pill" id="btnVoiceToggle" title="廣東話語音輸入">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+          <span id="voiceStatusText">粵語語音</span>
+        </div>
 
-          <button type="button" class="btn-action" id="btnCopy" title="複製">
-            <svg viewBox="0 0 24 24">
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-            </svg>
-            <span>複製</span>
-          </button>
+        <div class="pill ai-pill active" id="btnAiAutoToggle" title="AI 潤色開關">
+          <svg viewBox="0 0 24 24">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span id="aiAutoStatusText">AI 潤色: 開</span>
+        </div>
+      </div>
+    </header>
 
-          <div class="btn-download-group">
-            <button type="button" class="btn-download-main" id="btnDownload" title="下載檔案">
+    <main>
+      <div class="editor-container">
+        <div class="editor-body">
+          <textarea id="editor" placeholder="在此處自由輸入文字...（自動適應鍵盤高度，頁面不滾動）" autofocus></textarea>
+
+          <div class="live-caption-bar" id="liveCaptionBar">
+            <span class="live-dot"></span>
+            <span id="liveCaptionText">正在聽取...</span>
+          </div>
+        </div>
+
+        <!-- 候選字 Bar -->
+        <div class="ime-candidate-bar" id="imePanel">
+          <div class="ime-header">
+            <span class="ime-query" id="imeQueryText"></span>
+            <span class="ime-close-btn" id="imeCloseBtn">關閉</span>
+          </div>
+          <div class="ime-list" id="imeCandidates"></div>
+        </div>
+        
+        <!-- 底部單行控制列（保證永遠釘在虛擬鍵盤正上方） -->
+        <div class="action-bar">
+          <div class="stats" id="stats">0字</div>
+          <div class="buttons">
+            <button type="button" class="btn-ai-polish" id="btnAiPolishManual" title="AI 優化修飾">
               <svg viewBox="0 0 24 24">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
               </svg>
-              <span id="downloadBtnText">下載</span>
+              <span>潤色</span>
             </button>
-            <button type="button" class="btn-download-dropdown" id="btnToggleMenu">
-              <svg viewBox="0 0 24 24" style="width: 11px; height: 11px;">
-                <polyline points="6 9 12 15 18 9"></polyline>
+
+            <button type="button" class="btn-action" id="btnCut" title="剪下">
+              <svg viewBox="0 0 24 24">
+                <circle cx="6" cy="6" r="3"></circle>
+                <circle cx="6" cy="18" r="3"></circle>
+                <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
               </svg>
+              <span>剪下</span>
             </button>
-            <div class="dropdown-menu" id="formatMenu">
-              <button class="dropdown-item" data-ext="txt">純文字檔 <span class="ext">.txt</span></button>
-              <button class="dropdown-item" data-ext="md">Markdown <span class="ext">.md</span></button>
+
+            <button type="button" class="btn-action" id="btnCopy" title="複製">
+              <svg viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>複製</span>
+            </button>
+
+            <div class="btn-download-group">
+              <button type="button" class="btn-download-main" id="btnDownload" title="下載檔案">
+                <svg viewBox="0 0 24 24">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span id="downloadBtnText">下載</span>
+              </button>
+              <button type="button" class="btn-download-dropdown" id="btnToggleMenu">
+                <svg viewBox="0 0 24 24" style="width: 10px; height: 10px;">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+              </button>
+              <div class="dropdown-menu" id="formatMenu">
+                <button class="dropdown-item" data-ext="txt">純文字檔 <span class="ext">.txt</span></button>
+                <button class="dropdown-item" data-ext="md">Markdown <span class="ext">.md</span></button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </main>
+    </main>
+  </div>
 
   <div class="toast" id="toast">已複製到剪貼簿</div>
 
   <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
 
   <script>
+    const appRoot = document.getElementById('appRoot');
     const editor = document.getElementById('editor');
     const stats = document.getElementById('stats');
     const btnCut = document.getElementById('btnCut');
@@ -656,7 +681,35 @@
       toTraditional = OpenCC.Converter({ from: 'cn', to: 'hk' });
     }
 
+    /* ==========================================================
+       核心修復：使用 window.visualViewport 動態重算高度
+       確保鍵盤彈出時只有 textarea 縮小，整頁絕對不發生滾動
+       ========================================================== */
+    function adjustForVisualViewport() {
+      if (!window.visualViewport) return;
+      const vp = window.visualViewport;
+      
+      // 將整個 App 根容器限制在可視區域高度內
+      appRoot.style.height = `${vp.height}px`;
+      
+      // 確保視窗頂點歸零，防止任何因滾動產生的白邊或偏移
+      window.scrollTo(0, 0);
+    }
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', adjustForVisualViewport);
+      window.visualViewport.addEventListener('scroll', () => window.scrollTo(0, 0));
+    }
+
+    // 攔截 touchmove，嚴禁整個網頁被拉動（除了 textarea 內部）
+    document.addEventListener('touchmove', (e) => {
+      if (e.target !== editor) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
     window.addEventListener('DOMContentLoaded', () => {
+      adjustForVisualViewport();
       const saved = localStorage.getItem('zen_notepad_content');
       if (saved) {
         editor.value = saved;
@@ -672,8 +725,7 @@
     function updateStats() {
       const text = editor.value;
       const chars = text.length;
-      const words = text.trim() ? (text.match(/\\S+/g) || []).length : 0;
-      stats.textContent = `${chars} 字元 · ${words} 詞`;
+      stats.textContent = `${chars} 字`;
     }
 
     function showToast(msg) {
@@ -681,11 +733,11 @@
       toast.classList.add('show');
       setTimeout(() => {
         toast.classList.remove('show');
-      }, 2000);
+      }, 1800);
     }
 
     /* ==========================================================
-       廣東話輸入法核心修復（防止手機失焦）
+       廣東話輸入法修復核心（防失焦、防收鍵盤）
        ========================================================== */
     btnImeToggle.addEventListener('click', () => {
       isImeActive = !isImeActive;
@@ -784,7 +836,6 @@
       }
     });
 
-    // 監聽手機虛擬鍵盤輸入
     editor.addEventListener('beforeinput', (e) => {
       if (!isImeActive) return;
       if (e.data && /^[a-zA-Z]$/.test(e.data)) {
@@ -804,7 +855,6 @@
       renderCandidates();
     }
 
-    // 關鍵修復：touchstart + preventDefault 確保手機鍵盤不收起且即時選中
     function renderCandidates() {
       imeCandidates.innerHTML = '';
       candidatesList.slice(0, 8).forEach((word, idx) => {
@@ -968,11 +1018,11 @@
        ========================================================== */
     function localPolishRules(raw) {
       let text = raw;
-      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\\s]|$)/g, '');
+      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\s]|$)/g, '');
       text = text.replace(/(即係話|即係嗰個|咁樣嘅話|噉樣嘅話)/g, '即');
       text = text.replace(/(然後呢|同埋呢|跟住呢)/g, '，');
-      text = text.replace(/(.{2,6}?)\\1+/g, '$1');
-      text = text.replace(/\\s+/g, '，');
+      text = text.replace(/(.{2,6}?)\1+/g, '$1');
+      text = text.replace(/\s+/g, '，');
       if (!/[，。！？]$/.test(text.trim())) {
         text = text.trim() + '。';
       }
@@ -983,7 +1033,7 @@
       isAiAutoPolish = !isAiAutoPolish;
       btnAiAutoToggle.classList.toggle('active', isAiAutoPolish);
       aiAutoStatusText.textContent = `AI 潤色: ${isAiAutoPolish ? '開' : '關'}`;
-      showToast(isAiAutoPolish ? '已啟用語音自動 AI 潤色' : '已關閉語音潤色');
+      showToast(isAiAutoPolish ? '已啟用自動潤色' : '已關閉自動潤色');
     });
 
     btnAiPolishManual.addEventListener('click', () => {
