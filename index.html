@@ -33,7 +33,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* 鎖死 html 與 body，杜絕整個網頁上下回彈滾動 */
     html, body {
       position: fixed;
       top: 0;
@@ -42,7 +41,7 @@
       height: 100vh;
       height: 100dvh;
       overflow: hidden;
-      touch-action: none; /* 禁止整頁下拉刷新或滑動 */
+      touch-action: none;
       background-color: var(--bg-color);
       color: var(--text-main);
       font-family: 'Plus Jakarta Sans', 'Noto Sans TC', sans-serif;
@@ -56,7 +55,6 @@
       overflow: hidden;
     }
 
-    /* 頂部 Header 緊湊化 */
     header {
       padding: 8px 14px 6px;
       display: flex;
@@ -177,13 +175,12 @@
       border-color: #c7d2fe !important;
     }
 
-    /* 主工作區：嚴格貼合可視區域 */
     main {
       flex: 1;
       display: flex;
       flex-direction: column;
       padding: 0 10px 8px;
-      min-height: 0; /* 關鍵：允許 flex item 自由縮小 */
+      min-height: 0;
       overflow: hidden;
     }
 
@@ -201,7 +198,7 @@
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      min-height: 0; /* 縮小容忍 */
+      min-height: 0;
     }
 
     .editor-body {
@@ -213,7 +210,6 @@
       overflow: hidden;
     }
 
-    /* 輸入框自身獨立滾動，外界零滑動 */
     textarea {
       flex: 1;
       width: 100%;
@@ -228,8 +224,10 @@
       outline: none;
       resize: none;
       overflow-y: auto;
-      touch-action: pan-y; /* 僅允許輸入框內容內部上下捲動 */
+      touch-action: pan-y;
       -webkit-overflow-scrolling: touch;
+      position: relative;
+      z-index: 2;
     }
 
     @media (min-width: 640px) {
@@ -240,9 +238,80 @@
       }
     }
 
-    textarea::placeholder { color: #adb5bd; font-weight: 300; }
+    /* 空白狀態提示面板 */
+    .tips-overlay {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      bottom: 12px;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      color: #8b928c;
+      z-index: 1;
+      opacity: 0.88;
+      transition: opacity 0.2s ease;
+      overflow-y: auto;
+    }
 
-    /* 緊湊型候選字列 */
+    @media (min-width: 640px) {
+      .tips-overlay {
+        top: 20px;
+        left: 24px;
+        right: 24px;
+        max-width: 580px;
+      }
+    }
+
+    .tips-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #5c635d;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    @media (min-width: 520px) {
+      .tips-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .tip-card {
+      background: #f8faf8;
+      border: 1px solid #edf1ed;
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .tip-card strong {
+      color: var(--primary-color);
+      display: block;
+      margin-bottom: 2px;
+      font-size: 12px;
+    }
+
+    .tip-tag {
+      display: inline-block;
+      background: #eaefea;
+      color: #3b4a3f;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 11px;
+    }
+
     .ime-candidate-bar {
       display: none;
       background: #ffffff;
@@ -268,11 +337,22 @@
       color: var(--primary-color);
     }
 
+    .ime-header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ime-tip-counter {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
     .ime-close-btn {
       font-size: 11px;
       color: var(--text-muted);
       cursor: pointer;
-      padding: 1px 5px;
+      padding: 1px 6px;
       border-radius: 4px;
       background: #f1f3f2;
     }
@@ -289,7 +369,7 @@
     .ime-list::-webkit-scrollbar { display: none; }
 
     .ime-item {
-      padding: 6px 12px;
+      padding: 6px 13px;
       border-radius: 6px;
       background: #f4f6f4;
       color: var(--text-main);
@@ -318,7 +398,6 @@
       color: #949a94;
     }
 
-    /* 即時聽寫浮動字幕 */
     .live-caption-bar {
       display: none;
       position: absolute;
@@ -352,7 +431,6 @@
       50% { opacity: 0.3; }
     }
 
-    /* 底部操作欄：手機鍵盤彈出時仍死守底部，極小化空間消耗 */
     .action-bar {
       padding: 6px 10px;
       display: flex;
@@ -539,9 +617,9 @@
       </div>
       
       <div class="pill-group">
-        <div class="pill active" id="btnImeToggle" title="切換 Google 廣東話 / 英文輸入">
+        <div class="pill active" id="btnImeToggle" title="點擊或按 Shift 切換 Google 廣東話 / 英文輸入">
           <span class="badge">粵</span>
-          <span>粵拼鍵盤</span>
+          <span>粵拼鍵盤 (Shift)</span>
         </div>
 
         <div class="pill voice-pill" id="btnVoiceToggle" title="廣東話語音輸入">
@@ -566,7 +644,31 @@
     <main>
       <div class="editor-container">
         <div class="editor-body">
-          <textarea id="editor" placeholder="在此處自由輸入文字...（自動適應鍵盤高度，頁面不滾動）" autofocus></textarea>
+          <textarea id="editor" autofocus></textarea>
+
+          <!-- 空白狀態時顯示的廣東話輸入小貼士 -->
+          <div class="tips-overlay" id="tipsOverlay">
+            <div class="tips-title">💡 廣東話輸入小貼士</div>
+            <div class="tips-grid">
+              <div class="tip-card">
+                <strong>⚡ 連拼成功率更高</strong>
+                輸入 2~4 字組合詞精準度大增，減少同音字歧義。<br>
+                例如：<span class="tip-tag">gamjat</span> 今日 · <span class="tip-tag">moumantai</span> 冇問題
+              </div>
+              <div class="tip-card">
+                <strong>⌨️ 中英切換快捷鍵</strong>
+                實體鍵盤單按 <span class="tip-tag">Shift</span> 或 <span class="tip-tag">Ctrl + Space</span> 即時在粵拼與英文之間無縫切換。
+              </div>
+              <div class="tip-card">
+                <strong>📱 手機橫向滑動選字</strong>
+                候選字列已放寬至最多 16 個選項，手指左右滑動即可瀏覽完整詞語。
+              </div>
+              <div class="tip-card">
+                <strong>🎙️ 語音即時繁體與潤色</strong>
+                說話即刻逐字出字，停頓時自動進行去贅詞與繁體正體化。
+              </div>
+            </div>
+          </div>
 
           <div class="live-caption-bar" id="liveCaptionBar">
             <span class="live-dot"></span>
@@ -574,16 +676,19 @@
           </div>
         </div>
 
-        <!-- 候選字 Bar -->
+        <!-- 候選字 Bar（支援橫向滑動最多 16 個候選詞） -->
         <div class="ime-candidate-bar" id="imePanel">
           <div class="ime-header">
             <span class="ime-query" id="imeQueryText"></span>
-            <span class="ime-close-btn" id="imeCloseBtn">關閉</span>
+            <div class="ime-header-right">
+              <span class="ime-tip-counter" id="imeCounterText">最多 16 選項 (可橫向滑動)</span>
+              <span class="ime-close-btn" id="imeCloseBtn">關閉</span>
+            </div>
           </div>
           <div class="ime-list" id="imeCandidates"></div>
         </div>
         
-        <!-- 底部單行控制列（保證永遠釘在虛擬鍵盤正上方） -->
+        <!-- 底部單行控制列 -->
         <div class="action-bar">
           <div class="stats" id="stats">0字</div>
           <div class="buttons">
@@ -646,6 +751,7 @@
     const appRoot = document.getElementById('appRoot');
     const editor = document.getElementById('editor');
     const stats = document.getElementById('stats');
+    const tipsOverlay = document.getElementById('tipsOverlay');
     const btnCut = document.getElementById('btnCut');
     const btnCopy = document.getElementById('btnCopy');
     const btnDownload = document.getElementById('btnDownload');
@@ -681,18 +787,10 @@
       toTraditional = OpenCC.Converter({ from: 'cn', to: 'hk' });
     }
 
-    /* ==========================================================
-       核心修復：使用 window.visualViewport 動態重算高度
-       確保鍵盤彈出時只有 textarea 縮小，整頁絕對不發生滾動
-       ========================================================== */
     function adjustForVisualViewport() {
       if (!window.visualViewport) return;
       const vp = window.visualViewport;
-      
-      // 將整個 App 根容器限制在可視區域高度內
       appRoot.style.height = `${vp.height}px`;
-      
-      // 確保視窗頂點歸零，防止任何因滾動產生的白邊或偏移
       window.scrollTo(0, 0);
     }
 
@@ -701,12 +799,20 @@
       window.visualViewport.addEventListener('scroll', () => window.scrollTo(0, 0));
     }
 
-    // 攔截 touchmove，嚴禁整個網頁被拉動（除了 textarea 內部）
     document.addEventListener('touchmove', (e) => {
-      if (e.target !== editor) {
+      if (e.target !== editor && !imeCandidates.contains(e.target) && !tipsOverlay.contains(e.target)) {
         e.preventDefault();
       }
     }, { passive: false });
+
+    // 切換小貼士顯示狀態
+    function updateOverlayVisibility() {
+      if (!editor.value && imeBuffer.length === 0) {
+        tipsOverlay.style.display = 'flex';
+      } else {
+        tipsOverlay.style.display = 'none';
+      }
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       adjustForVisualViewport();
@@ -715,17 +821,18 @@
         editor.value = saved;
         updateStats();
       }
+      updateOverlayVisibility();
     });
 
     editor.addEventListener('input', () => {
       updateStats();
+      updateOverlayVisibility();
       localStorage.setItem('zen_notepad_content', editor.value);
     });
 
     function updateStats() {
       const text = editor.value;
-      const chars = text.length;
-      stats.textContent = `${chars} 字`;
+      stats.textContent = `${text.length} 字`;
     }
 
     function showToast(msg) {
@@ -737,14 +844,18 @@
     }
 
     /* ==========================================================
-       廣東話輸入法修復核心（防失焦、防收鍵盤）
+       切換輸入法（含 Hot Key 切換）
        ========================================================== */
-    btnImeToggle.addEventListener('click', () => {
-      isImeActive = !isImeActive;
+    function toggleIme(forceState = null) {
+      isImeActive = forceState !== null ? forceState : !isImeActive;
       btnImeToggle.classList.toggle('active', isImeActive);
-      if (!isImeActive) cancelIME();
-      showToast(isImeActive ? '已啟用粵拼鍵盤' : '已切換為原生鍵盤');
-    });
+      if (!isImeActive) {
+        cancelIME();
+      }
+      showToast(isImeActive ? '🔤 已切換至 Google 廣東話' : '🔤 已切換至 英文輸入');
+    }
+
+    btnImeToggle.addEventListener('click', () => toggleIme());
 
     imeCloseBtn.addEventListener('click', () => {
       cancelIME();
@@ -754,7 +865,7 @@
       return new Promise((resolve) => {
         const callbackName = 'google_ime_' + Math.floor(Math.random() * 1000000);
         const script = document.createElement('script');
-        script.src = `https://inputtools.google.com/request?text=${encodeURIComponent(query)}&itc=yue-hant-t-i0-und&num=8&cp=0&cs=1&ie=utf-8&oe=utf-8&app=test&cb=${callbackName}`;
+        script.src = `https://inputtools.google.com/request?text=${encodeURIComponent(query)}&itc=yue-hant-t-i0-und&num=16&cp=0&cs=1&ie=utf-8&oe=utf-8&app=test&cb=${callbackName}`;
         
         window[callbackName] = function(data) {
           cleanUp();
@@ -780,6 +891,22 @@
     }
 
     editor.addEventListener('keydown', async (e) => {
+      // Hot Key 1: Ctrl + Space
+      if (e.ctrlKey && e.code === 'Space') {
+        e.preventDefault();
+        toggleIme();
+        return;
+      }
+
+      // Hot Key 2: 單按 Shift 切換
+      if (e.key === 'Shift') {
+        if (imeBuffer.length > 0) {
+          commitCandidate(imeBuffer);
+        }
+        toggleIme();
+        return;
+      }
+
       if (!isImeActive) return;
 
       if (imeBuffer.length > 0) {
@@ -789,7 +916,7 @@
           return;
         }
 
-        if (/^[1-8]$/.test(e.key)) {
+        if (/^[1-9]$/.test(e.key)) {
           const idx = parseInt(e.key) - 1;
           if (idx < candidatesList.length) {
             e.preventDefault();
@@ -848,6 +975,7 @@
     async function updateCandidates() {
       imeQueryText.textContent = imeBuffer;
       imePanel.style.display = 'block';
+      updateOverlayVisibility();
 
       const list = await fetchGoogleCantonese(imeBuffer);
       candidatesList = list.length > 0 ? list : [imeBuffer];
@@ -857,7 +985,7 @@
 
     function renderCandidates() {
       imeCandidates.innerHTML = '';
-      candidatesList.slice(0, 8).forEach((word, idx) => {
+      candidatesList.slice(0, 16).forEach((word, idx) => {
         const item = document.createElement('div');
         item.className = 'ime-item' + (idx === selectedIndex ? ' active' : '');
         item.innerHTML = `<span class="num">${idx + 1}.</span><span>${word}</span>`;
@@ -887,6 +1015,7 @@
       candidatesList = [];
       selectedIndex = 0;
       imePanel.style.display = 'none';
+      updateOverlayVisibility();
     }
 
     function insertTextAtCursor(text) {
@@ -897,6 +1026,7 @@
       editor.value = val.substring(0, start) + text + val.substring(end);
       editor.selectionStart = editor.selectionEnd = start + text.length;
       updateStats();
+      updateOverlayVisibility();
       localStorage.setItem('zen_notepad_content', editor.value);
     }
 
@@ -982,6 +1112,7 @@
       editor.scrollTop = editor.scrollHeight;
 
       updateStats();
+      updateOverlayVisibility();
       localStorage.setItem('zen_notepad_content', editor.value);
     }
 
@@ -1018,11 +1149,11 @@
        ========================================================== */
     function localPolishRules(raw) {
       let text = raw;
-      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\s]|$)/g, '');
+      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\\s]|$)/g, '');
       text = text.replace(/(即係話|即係嗰個|咁樣嘅話|噉樣嘅話)/g, '即');
       text = text.replace(/(然後呢|同埋呢|跟住呢)/g, '，');
-      text = text.replace(/(.{2,6}?)\1+/g, '$1');
-      text = text.replace(/\s+/g, '，');
+      text = text.replace(/(.{2,6}?)\\1+/g, '$1');
+      text = text.replace(/\\s+/g, '，');
       if (!/[，。！？]$/.test(text.trim())) {
         text = text.trim() + '。';
       }
@@ -1057,6 +1188,7 @@
       }
 
       updateStats();
+      updateOverlayVisibility();
       localStorage.setItem('zen_notepad_content', editor.value);
       showToast('AI 潤色完成 ✨');
     });
@@ -1088,6 +1220,7 @@
       }
       editor.focus();
       updateStats();
+      updateOverlayVisibility();
       localStorage.setItem('zen_notepad_content', editor.value);
       showToast('已剪下至剪貼簿 ✂️');
     });
