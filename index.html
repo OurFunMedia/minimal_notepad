@@ -374,7 +374,7 @@
       display: flex;
       align-items: center;
       gap: 5px;
-      overflow: hidden; /* 徹底關閉滾動，防止誤碰 */
+      overflow: hidden;
       padding: 2px 0;
       width: 100%;
     }
@@ -832,8 +832,9 @@
     let imeBuffer = '';
     let candidatesList = [];
     let currentPage = 0;
-    const PAGE_SIZE = 4; // 固定每頁顯示 4 個字，最符合手指觸控面積與零誤觸原則
+    const PAGE_SIZE = 4;
     let isAiAutoPolish = true;
+    let isVoiceRecording = false; // 追蹤語音錄音狀態
 
     let toTraditional = (text) => text;
     if (window.OpenCC) {
@@ -858,8 +859,9 @@
       }
     }, { passive: false });
 
+    // 核心修復：包含語音狀態判斷，只要正在語音或有文字，提示字卡必定消失
     function updateOverlayVisibility() {
-      if (!editor.value && imeBuffer.length === 0) {
+      if (!editor.value && imeBuffer.length === 0 && !isVoiceRecording) {
         tipsOverlay.style.display = 'flex';
       } else {
         tipsOverlay.style.display = 'none';
@@ -967,7 +969,6 @@
           return;
         }
 
-        // 數字鍵 1-4 直接選取當前頁面字詞
         if (/^[1-4]$/.test(e.key)) {
           const idx = (currentPage * PAGE_SIZE) + (parseInt(e.key) - 1);
           if (idx < candidatesList.length) {
@@ -1058,7 +1059,6 @@
 
       imeCounterText.textContent = `第 ${currentPage + 1}/${totalPages} 頁`;
 
-      // 更新翻頁按鈕禁用狀態
       imePrevBtn.classList.toggle('disabled', currentPage === 0);
       imeNextBtn.classList.toggle('disabled', (currentPage + 1) >= totalPages);
 
@@ -1080,7 +1080,6 @@
       }
     }
 
-    // 翻頁按鈕觸控監聽
     imeNextBtn.addEventListener('touchstart', (e) => { e.preventDefault(); nextImePage(); }, { passive: false });
     imeNextBtn.addEventListener('mousedown', (e) => { e.preventDefault(); nextImePage(); });
 
@@ -1114,11 +1113,10 @@
     }
 
     /* ==========================================================
-       語音輸入 (Web Speech API)
+       語音輸入 (Web Speech API) - 完美隱藏提示卡
        ========================================================== */
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
-    let isRecording = false;
     let speechInsertStartIndex = 0;
     let speechCurrentInsertedLength = 0;
 
@@ -1129,11 +1127,14 @@
       recognition.lang = 'zh-HK';
 
       recognition.onstart = () => {
-        isRecording = true;
+        isVoiceRecording = true;
         btnVoiceToggle.classList.add('recording');
         voiceStatusText.textContent = '聆聽中';
         liveCaptionBar.style.display = 'inline-flex';
         liveCaptionText.textContent = '準備聆聽...';
+
+        // 關鍵：按下語音輸入的當下，立刻將提示文字層完全隱藏
+        updateOverlayVisibility();
 
         speechInsertStartIndex = editor.selectionStart;
         speechCurrentInsertedLength = 0;
@@ -1176,7 +1177,7 @@
       };
 
       recognition.onend = () => {
-        if (isRecording) {
+        if (isVoiceRecording) {
           try { recognition.start(); } catch(e) { stopRecording(); }
         } else {
           stopRecording();
@@ -1195,6 +1196,7 @@
       editor.scrollTop = editor.scrollHeight;
 
       updateStats();
+      updateOverlayVisibility();
       localStorage.setItem('zen_notepad_content', editor.value);
     }
 
@@ -1207,18 +1209,19 @@
     }
 
     function stopRecording() {
-      isRecording = false;
+      isVoiceRecording = false;
       btnVoiceToggle.classList.remove('recording');
       voiceStatusText.textContent = '粵語語音';
       liveCaptionBar.style.display = 'none';
       speechCurrentInsertedLength = 0;
+      updateOverlayVisibility(); // 語音結束後依據內容決定是否重現
       if (recognition) {
         try { recognition.stop(); } catch(e){}
       }
     }
 
     btnVoiceToggle.addEventListener('click', () => {
-      if (!isRecording) {
+      if (!isVoiceRecording) {
         startRecording();
       } else {
         stopRecording();
@@ -1231,11 +1234,11 @@
        ========================================================== */
     function localPolishRules(raw) {
       let text = raw;
-      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\\s]|$)/g, '');
+      text = text.replace(/(呃+|嗯+|啊+|呀+|喔+|啦+)(?=[，。！？\s]|$)/g, '');
       text = text.replace(/(即係話|即係嗰個|咁樣嘅話|噉樣嘅話)/g, '即');
       text = text.replace(/(然後呢|同埋呢|跟住呢)/g, '，');
-      text = text.replace(/(.{2,6}?)\\1+/g, '$1');
-      text = text.replace(/\\s+/g, '，');
+      text = text.replace(/(.{2,6}?)\1+/g, '$1');
+      text = text.replace(/\s+/g, '，');
       if (!/[，。！？]$/.test(text.trim())) {
         text = text.trim() + '。';
       }
