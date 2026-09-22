@@ -315,7 +315,7 @@
       font-size: 11px;
     }
 
-    /* 方案一：無滑動、帶翻頁按鈕的固定候選字列 */
+    /* 固定候選字列（無滑動、等分帶翻頁） */
     .ime-candidate-bar {
       display: none;
       background: #ffffff;
@@ -368,7 +368,6 @@
       width: 100%;
     }
 
-    /* 徹底禁止候選字橫向滾動 */
     .ime-list {
       flex: 1;
       display: flex;
@@ -379,7 +378,6 @@
       width: 100%;
     }
 
-    /* 候選字等分寬度，提供充足防誤觸按鈕空間 */
     .ime-item {
       flex: 1;
       padding: 7px 4px;
@@ -415,7 +413,6 @@
       color: #949a94;
     }
 
-    /* 翻頁按鈕 */
     .ime-page-btn {
       display: inline-flex;
       align-items: center;
@@ -662,7 +659,7 @@
       </div>
       
       <div class="pill-group">
-        <div class="pill active" id="btnImeToggle" title="點擊或按 Shift 切換 Google 廣東話 / 英文輸入">
+        <div class="pill active" id="btnImeToggle" title="點擊或單按 Shift 切換 Google 廣東話 / 英文輸入">
           <span class="badge">粵</span>
           <span>粵拼鍵盤 (Shift)</span>
         </div>
@@ -702,7 +699,7 @@
               </div>
               <div class="tip-card">
                 <strong>⌨️ 中英切換快捷鍵</strong>
-                實體鍵盤單按 <span class="tip-tag">Shift</span> 或 <span class="tip-tag">Ctrl + Space</span> 即時在粵拼與英文之間無縫切換。
+                實體鍵盤單獨按一下 <span class="tip-tag">Shift</span> 放開，或按 <span class="tip-tag">Ctrl + Space</span> 切換（按住 Shift + 字母仍為大寫）。
               </div>
               <div class="tip-card">
                 <strong>📱 點擊翻頁防誤觸</strong>
@@ -721,7 +718,7 @@
           </div>
         </div>
 
-        <!-- 候選字 Bar（方案一：禁止滑動，固定 4 字 + 翻頁按鈕） -->
+        <!-- 候選字 Bar -->
         <div class="ime-candidate-bar" id="imePanel">
           <div class="ime-header">
             <span class="ime-query" id="imeQueryText"></span>
@@ -834,7 +831,11 @@
     let currentPage = 0;
     const PAGE_SIZE = 4;
     let isAiAutoPolish = true;
-    let isVoiceRecording = false; // 追蹤語音錄音狀態
+    let isVoiceRecording = false;
+
+    // Shift 鍵防大寫衝突狀態鎖
+    let shiftDownTime = 0;
+    let otherKeyPressedWhileShift = false;
 
     let toTraditional = (text) => text;
     if (window.OpenCC) {
@@ -859,7 +860,6 @@
       }
     }, { passive: false });
 
-    // 核心修復：包含語音狀態判斷，只要正在語音或有文字，提示字卡必定消失
     function updateOverlayVisibility() {
       if (!editor.value && imeBuffer.length === 0 && !isVoiceRecording) {
         tipsOverlay.style.display = 'flex';
@@ -898,7 +898,7 @@
     }
 
     /* ==========================================================
-       切換輸入法（含 Hot Key 切換）
+       切換輸入法
        ========================================================== */
     function toggleIme(forceState = null) {
       isImeActive = forceState !== null ? forceState : !isImeActive;
@@ -944,23 +944,34 @@
       });
     }
 
+    /* ==========================================================
+       鍵盤事件監聽（完美相容 Shift 大寫與單擊切換）
+       ========================================================== */
     editor.addEventListener('keydown', async (e) => {
+      // 1. 偵測 Ctrl + Space
       if (e.ctrlKey && e.code === 'Space') {
         e.preventDefault();
         toggleIme();
         return;
       }
 
+      // 2. 記錄 Shift 按下時刻
       if (e.key === 'Shift') {
-        if (imeBuffer.length > 0) {
-          commitCandidate(imeBuffer);
+        if (!shiftDownTime) {
+          shiftDownTime = Date.now();
+          otherKeyPressedWhileShift = false;
         }
-        toggleIme();
         return;
+      }
+
+      // 若按住 Shift 期間鍵入了其他按鍵（如 Shift + A = 大寫 A），標記為組合鍵
+      if (e.shiftKey) {
+        otherKeyPressedWhileShift = true;
       }
 
       if (!isImeActive) return;
 
+      // 粵拼候選操作
       if (imeBuffer.length > 0) {
         if (e.key === ' ' || e.key === 'Enter') {
           e.preventDefault();
@@ -1007,16 +1018,35 @@
         }
       }
 
-      if (/^[a-z]$/i.test(e.key) && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      // 僅在沒有按下 Shift（非大寫）、沒有 Ctrl/Alt/Meta 時，才將英文字母攔截進粵拼
+      if (/^[a-z]$/i.test(e.key) && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
         imeBuffer += e.key.toLowerCase();
         updateCandidates();
       }
     });
 
+    // 只有在單獨點按 Shift 且未搭配其他按鍵時，放開時切換輸入法
+    editor.addEventListener('keyup', (e) => {
+      if (e.key === 'Shift') {
+        const pressDuration = Date.now() - shiftDownTime;
+        // 小於 500ms 且期間沒有按過其他字母 -> 判定為單按 Shift 切換
+        if (!otherKeyPressedWhileShift && pressDuration < 500) {
+          if (imeBuffer.length > 0) {
+            commitCandidate(imeBuffer);
+          }
+          toggleIme();
+        }
+        shiftDownTime = 0;
+        otherKeyPressedWhileShift = false;
+      }
+    });
+
+    // 手機端相容處理
     editor.addEventListener('beforeinput', (e) => {
       if (!isImeActive) return;
-      if (e.data && /^[a-zA-Z]$/.test(e.data)) {
+      // 僅攔截純小寫拼音字母；若使用者在手機按了大寫字母或符號，直接正常輸入
+      if (e.data && /^[a-z]$/.test(e.data)) {
         e.preventDefault();
         imeBuffer += e.data.toLowerCase();
         updateCandidates();
@@ -1058,10 +1088,8 @@
       });
 
       imeCounterText.textContent = `第 ${currentPage + 1}/${totalPages} 頁`;
-
       imePrevBtn.classList.toggle('disabled', currentPage === 0);
       imeNextBtn.classList.toggle('disabled', (currentPage + 1) >= totalPages);
-
       imePanel.style.display = 'block';
     }
 
@@ -1113,7 +1141,7 @@
     }
 
     /* ==========================================================
-       語音輸入 (Web Speech API) - 完美隱藏提示卡
+       語音輸入 (Web Speech API)
        ========================================================== */
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
@@ -1133,7 +1161,6 @@
         liveCaptionBar.style.display = 'inline-flex';
         liveCaptionText.textContent = '準備聆聽...';
 
-        // 關鍵：按下語音輸入的當下，立刻將提示文字層完全隱藏
         updateOverlayVisibility();
 
         speechInsertStartIndex = editor.selectionStart;
@@ -1214,7 +1241,7 @@
       voiceStatusText.textContent = '粵語語音';
       liveCaptionBar.style.display = 'none';
       speechCurrentInsertedLength = 0;
-      updateOverlayVisibility(); // 語音結束後依據內容決定是否重現
+      updateOverlayVisibility();
       if (recognition) {
         try { recognition.stop(); } catch(e){}
       }
