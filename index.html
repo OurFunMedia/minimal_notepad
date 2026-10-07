@@ -659,9 +659,9 @@
       </div>
       
       <div class="pill-group">
-        <div class="pill active" id="btnImeToggle" title="點擊或單按 Shift 切換 Google 廣東話 / 英文輸入">
+        <div class="pill active" id="btnImeToggle" title="點擊切換 Google 廣東話 / 英文輸入（快捷鍵 Ctrl + Space）">
           <span class="badge">粵</span>
-          <span>粵拼鍵盤 (Shift)</span>
+          <span>粵拼鍵盤</span>
         </div>
 
         <div class="pill voice-pill" id="btnVoiceToggle" title="廣東話語音輸入">
@@ -699,7 +699,7 @@
               </div>
               <div class="tip-card">
                 <strong>⌨️ 中英切換快捷鍵</strong>
-                實體鍵盤單獨按一下 <span class="tip-tag">Shift</span> 放開，或按 <span class="tip-tag">Ctrl + Space</span> 切換（按住 Shift + 字母仍為大寫）。
+                實體鍵盤按 <span class="tip-tag">Ctrl + Space</span> 即時在粵拼與英文之間無縫切換（Shift 鍵維持英文大寫與符號輸入）。
               </div>
               <div class="tip-card">
                 <strong>📱 點擊翻頁防誤觸</strong>
@@ -833,10 +833,6 @@
     let isAiAutoPolish = true;
     let isVoiceRecording = false;
 
-    // Shift 鍵防大寫衝突狀態鎖
-    let shiftDownTime = 0;
-    let otherKeyPressedWhileShift = false;
-
     let toTraditional = (text) => text;
     if (window.OpenCC) {
       toTraditional = OpenCC.Converter({ from: 'cn', to: 'hk' });
@@ -898,7 +894,7 @@
     }
 
     /* ==========================================================
-       切換輸入法
+       切換輸入法（僅保留 Ctrl + Space 與手動按鈕）
        ========================================================== */
     function toggleIme(forceState = null) {
       isImeActive = forceState !== null ? forceState : !isImeActive;
@@ -945,28 +941,14 @@
     }
 
     /* ==========================================================
-       鍵盤事件監聽（完美相容 Shift 大寫與單擊切換）
+       鍵盤事件監聽（Shift 僅作為原生大寫鍵，純 Ctrl + Space 切換）
        ========================================================== */
     editor.addEventListener('keydown', async (e) => {
-      // 1. 偵測 Ctrl + Space
+      // 僅以 Ctrl + Space 作為中英文切換熱鍵
       if (e.ctrlKey && e.code === 'Space') {
         e.preventDefault();
         toggleIme();
         return;
-      }
-
-      // 2. 記錄 Shift 按下時刻
-      if (e.key === 'Shift') {
-        if (!shiftDownTime) {
-          shiftDownTime = Date.now();
-          otherKeyPressedWhileShift = false;
-        }
-        return;
-      }
-
-      // 若按住 Shift 期間鍵入了其他按鍵（如 Shift + A = 大寫 A），標記為組合鍵
-      if (e.shiftKey) {
-        otherKeyPressedWhileShift = true;
       }
 
       if (!isImeActive) return;
@@ -1018,7 +1000,7 @@
         }
       }
 
-      // 僅在沒有按下 Shift（非大寫）、沒有 Ctrl/Alt/Meta 時，才將英文字母攔截進粵拼
+      // 正常純小寫字母攔截進入粵拼緩存；若按住 Shift 鍵則直接正常輸入大寫英文字母，互不干擾
       if (/^[a-z]$/i.test(e.key) && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
         e.preventDefault();
         imeBuffer += e.key.toLowerCase();
@@ -1026,26 +1008,10 @@
       }
     });
 
-    // 只有在單獨點按 Shift 且未搭配其他按鍵時，放開時切換輸入法
-    editor.addEventListener('keyup', (e) => {
-      if (e.key === 'Shift') {
-        const pressDuration = Date.now() - shiftDownTime;
-        // 小於 500ms 且期間沒有按過其他字母 -> 判定為單按 Shift 切換
-        if (!otherKeyPressedWhileShift && pressDuration < 500) {
-          if (imeBuffer.length > 0) {
-            commitCandidate(imeBuffer);
-          }
-          toggleIme();
-        }
-        shiftDownTime = 0;
-        otherKeyPressedWhileShift = false;
-      }
-    });
-
     // 手機端相容處理
     editor.addEventListener('beforeinput', (e) => {
       if (!isImeActive) return;
-      // 僅攔截純小寫拼音字母；若使用者在手機按了大寫字母或符號，直接正常輸入
+      // 僅攔截純小寫拼音字母；若輸入大寫或符號，直接正常上屏
       if (e.data && /^[a-z]$/.test(e.data)) {
         e.preventDefault();
         imeBuffer += e.data.toLowerCase();
@@ -1223,7 +1189,6 @@
       editor.scrollTop = editor.scrollHeight;
 
       updateStats();
-      updateOverlayVisibility();
       localStorage.setItem('zen_notepad_content', editor.value);
     }
 
@@ -1300,7 +1265,6 @@
       }
 
       updateStats();
-      updateOverlayVisibility();
       localStorage.setItem('zen_notepad_content', editor.value);
       showToast('AI 潤色完成 ✨');
     });
